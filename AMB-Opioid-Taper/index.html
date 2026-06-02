@@ -34,7 +34,7 @@
     td { padding: 7px 8px; border-bottom: 0.5px solid rgba(0,0,0,0.07); color: #1a1a1a; }
     tr:last-child td { border-bottom: none; }
     .alt-row td { background: #fafafa; }
-    .flag-row td { background: #FAEEDA !important; }
+    .flag-row td { background: #FAEEDA; }
     .flag-cell { font-size: 11px; color: #633806; font-style: italic; display: block; margin-top: 3px; }
     .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
     .badge-warn { background: #FAEEDA; color: #633806; }
@@ -66,7 +66,39 @@
     .patient-footer { font-size: 12px; color: #666; margin-top: 1rem; padding: 0.75rem; background: #f5f5f3; border-radius: 8px; line-height: 1.6; }
     .note-area { font-size: 13px; line-height: 1.85; color: #1a1a1a; }
     .note-hint { font-size: 12px; color: #888; margin-bottom: 1rem; }
+    .alt-panel { border: 0.5px solid #EF9F27; border-radius: 12px; background: #fff; margin: 0.75rem 0 1rem; overflow: hidden; }
+    .alt-panel-header { background: #FAEEDA; padding: 10px 14px; display: flex; align-items: flex-start; gap: 8px; }
+    .alt-panel-title { font-size: 13px; font-weight: 500; color: #633806; }
+    .alt-panel-sub { font-size: 12px; color: #854F0B; margin-top: 2px; }
+    .alt-option { padding: 11px 14px; border-bottom: 0.5px solid rgba(0,0,0,0.07); display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+    .alt-option:last-child { border-bottom: none; }
+    .alt-option:hover { background: #fafafa; }
+    .alt-option.selected { background: #EAF3DE; }
+    .alt-radio { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #aaa; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+    .alt-radio.checked { background: #3B6D11; border-color: #3B6D11; }
+    .alt-radio.checked::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; display: block; }
+    .alt-body { flex: 1; }
+    .alt-dose { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+    .alt-detail { font-size: 12px; color: #666; margin-top: 2px; }
+    .alt-tag { font-size: 11px; padding: 1px 7px; border-radius: 20px; font-weight: 500; margin-left: 6px; vertical-align: middle; }
+    .alt-tag-best { background: #27500A; color: #fff; }
+    .alt-tag-over { background: #FAEEDA; color: #633806; }
     @media (max-width: 580px) { .field-row, .field-row.three { grid-template-columns: 1fr; } }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 1.5rem; position: relative; }
+    .modal-title { font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+    .modal-subtitle { font-size: 13px; color: #666; margin-bottom: 1.25rem; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; font-size: 20px; color: #888; line-height: 1; }
+    .modal-close:hover { color: #1a1a1a; }
+    .modal-section { margin-bottom: 1rem; }
+    .modal-section h3 { font-size: 13px; font-weight: 500; color: #555; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .modal-section p { font-size: 13px; color: #1a1a1a; line-height: 1.65; margin-bottom: 0.6rem; }
+    .modal-section ul { font-size: 13px; color: #1a1a1a; line-height: 1.65; padding-left: 1.25rem; margin-bottom: 0.6rem; }
+    .modal-section li { margin-bottom: 4px; }
+    .modal-section ol { font-size: 13px; color: #1a1a1a; line-height: 1.65; padding-left: 1.25rem; }
+    .modal-divider { height: 0.5px; background: rgba(0,0,0,0.1); margin: 1rem 0; }
+    .modal-trigger { font-size: 12px; padding: 4px 10px; border: 0.5px solid #378ADD; border-radius: 20px; background: #E6F1FB; color: #0C447C; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -74,6 +106,7 @@
   <div class="page-header">
     <h1>Opioid Taper Calculator</h1>
     <p>For outpatient / primary care use. Generates a starting taper framework — reassess and adjust at every visit.</p>
+    <p style="font-size:12px;color:#888;margin-top:4px;">Last updated: June 2, 2026</p>
   </div>
 
   <div class="section">
@@ -180,27 +213,18 @@
   <div class="section">
     <div class="toolbar">
       <div class="toolbar-row">
-        <button class="view-btn active" id="btn-provider" onclick="switchView('provider')">
-          <i class="ti ti-stethoscope"></i> Provider schedule view
-        </button>
-        <button class="view-btn" id="btn-patient" onclick="switchView('patient')">
-          <i class="ti ti-user"></i> Patient schedule view
-        </button>
-        <button class="action-btn" onclick="printPatient()">
-          <i class="ti ti-printer"></i> Print patient schedule (AVS)
-        </button>
+        <button class="view-btn active" id="btn-provider" onclick="switchView('provider')"><i class="ti ti-stethoscope"></i> Provider schedule view</button>
+        <button class="view-btn" id="btn-patient" onclick="switchView('patient')"><i class="ti ti-user"></i> Patient schedule view</button>
+        <button class="action-btn" onclick="printPatient()"><i class="ti ti-printer"></i> Print patient schedule (AVS)</button>
       </div>
       <div class="toolbar-row">
-        <button class="view-btn" id="btn-note" onclick="switchView('note')">
-          <i class="ti ti-clipboard-text"></i> Chart note
-        </button>
-        <button class="action-btn" id="copy-note-btn" onclick="copyNote()">
-          <i class="ti ti-clipboard"></i> Copy note for chart
-        </button>
+        <button class="view-btn" id="btn-note" onclick="switchView('note')"><i class="ti ti-clipboard-text"></i> Chart note</button>
+        <button class="action-btn" id="copy-note-btn" onclick="copyNote()"><i class="ti ti-clipboard"></i> Copy note for chart</button>
       </div>
     </div>
     <div class="view-panel active" id="panel-provider">
       <div id="schedule-wrap"></div>
+      <div id="alt-panels-wrap"></div>
       <div class="reminder" id="clinical-note"></div>
     </div>
     <div class="view-panel" id="panel-patient"><div id="patient-wrap"></div></div>
@@ -211,110 +235,125 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="terminal-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('terminal-modal').classList.remove('open')" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Terminal taper switch</div>
+    <div class="modal-subtitle">ER to IR conversion guidance</div>
+
+    <div class="modal-section">
+      <p>Convert the patient from ER to IR when the taper hits the lowest manufactured dose of the ER medication and further reductions are impossible — ER tablets cannot be cut.</p>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <div class="modal-section">
+      <h3>Lowest available ER strengths</h3>
+      <ul>
+        <li><strong>Oxycodone ER (OxyContin):</strong> Lowest dose is 10 mg (taken Q12h = 20 mg total daily dose)</li>
+        <li><strong>Morphine ER (MS Contin):</strong> Lowest dose is 15 mg (taken Q12h = 30 mg total daily dose)</li>
+      </ul>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <div class="modal-section">
+      <h3>How the terminal switch works</h3>
+      <p>Once a patient is stable on Oxycodone ER 10 mg twice daily (20 mg total daily dose) and is ready to step down further, you cannot prescribe a "5 mg ER" tablet because it doesn't exist — and you cannot cut the 10 mg ER tablet.</p>
+      <p>At this exact crossroad, convert the 20 mg total daily dose into an IR regimen:</p>
+      <ol>
+        <li>Switch to Oxycodone IR 5 mg taken three to four times a day (maintaining a similar total daily dose of 15–20 mg).</li>
+        <li>Allow the patient to stabilize on the IR regimen for 1–2 weeks.</li>
+        <li>Begin tapering the IR regimen by either extending the time between doses (e.g., from every 6 hours to every 8 hours) or using a pill cutter to halve the IR tablets (e.g., dropping a 5 mg IR tablet to 2.5 mg).</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
 <script>
 const DISPLAY_WEEKS = 12;
 
-const MME = {
-  morphine:1, morphine_er:1,
-  oxycodone:1.5, oxycodone_er:1.5,
-  hydrocodone:1, hydrocodone_er:1,
-  hydromorphone:4, hydromorphone_er:4,
-  tramadol:0.1, tramadol_er:0.1,
-  codeine:0.15,
-  methadone:8, methadone_dispersible:8,
-  fentanyl:2.4, buprenorphine:12.6
-};
+const MME = {morphine:1,morphine_er:1,oxycodone:1.5,oxycodone_er:1.5,hydrocodone:1,hydrocodone_er:1,hydromorphone:4,hydromorphone_er:4,tramadol:0.1,tramadol_er:0.1,codeine:0.15,methadone:8,methadone_dispersible:8,fentanyl:2.4,buprenorphine:12.6};
+const isLA = {morphine_er:true,oxycodone_er:true,hydrocodone_er:true,hydromorphone_er:true,tramadol_er:true,fentanyl:true,buprenorphine:true};
+const canCut = {morphine:true,oxycodone:true,hydrocodone:true,hydromorphone:true,tramadol:true,codeine:true,methadone:true,methadone_dispersible:true};
 
-const isLA = {
-  morphine_er:true, oxycodone_er:true, hydrocodone_er:true,
-  hydromorphone_er:true, tramadol_er:true,
-  fentanyl:true, buprenorphine:true
-};
-
-// canCut: IR tablets that can be split with a pill cutter
-const canCut = {
-  morphine:true, oxycodone:true, hydrocodone:true,
-  hydromorphone:true, tramadol:true, codeine:true,
-  methadone:true, methadone_dispersible:true
-};
-
-// Base tablet strengths (whole tablets only)
 const BASE_STRENGTHS = {
-  morphine:        [15, 30],
-  morphine_er:     [15, 30, 60, 100, 200],
-  oxycodone:       [5, 10, 15, 20, 30],
-  oxycodone_er:    [10, 15, 20, 30, 40, 60, 80],
-  hydrocodone:     [5, 7.5, 10],
-  hydrocodone_er:  [20, 30, 40, 60, 80, 100, 120],
-  hydromorphone:   [2, 4, 8],
-  hydromorphone_er:[8, 12, 16, 32],
-  tramadol:        [25, 50, 75, 100],
-  tramadol_er:     [100, 200, 300],
-  codeine:         [15, 30, 60],
-  methadone:       [5, 10],
-  methadone_dispersible:[40],
-  fentanyl:        [12, 25, 37.5, 50, 62.5, 75, 87.5, 100],
-  buprenorphine:   [5, 7.5, 10, 15, 20]
+  morphine:[15,30],morphine_er:[15,30,60,100,200],
+  oxycodone:[5,10,15,20,30],oxycodone_er:[10,15,20,30,40,60,80],
+  hydrocodone:[5,7.5,10],hydrocodone_er:[20,30,40,60,80,100,120],
+  hydromorphone:[2,4,8],hydromorphone_er:[8,12,16,32],
+  tramadol:[25,50,75,100],tramadol_er:[100,200,300],
+  codeine:[15,30,60],
+  methadone:[5,10],methadone_dispersible:[40],
+  fentanyl:[12,25,37.5,50,62.5,75,87.5,100],
+  buprenorphine:[5,7.5,10,15,20]
 };
 
-// Build full strength list including half-tablets for cuttable IR drugs
+
+// ER -> IR equivalent drug mapping
+const erToIR = {
+  morphine_er: 'morphine',
+  oxycodone_er: 'oxycodone',
+  hydrocodone_er: 'hydrocodone',
+  hydromorphone_er: 'hydromorphone',
+  tramadol_er: 'tramadol'
+};
+
+const drugLabels = {morphine:'Morphine IR',morphine_er:'Morphine ER',oxycodone:'Oxycodone IR',oxycodone_er:'Oxycodone ER',hydrocodone:'Hydrocodone IR',hydrocodone_er:'Hydrocodone ER',hydromorphone:'Hydromorphone IR',hydromorphone_er:'Hydromorphone ER',tramadol:'Tramadol IR',tramadol_er:'Tramadol ER',codeine:'Codeine IR',methadone:'Methadone IR',methadone_dispersible:'Methadone 40 mg dispersible',fentanyl:'Fentanyl patch',buprenorphine:'Buprenorphine patch'};
+const durationLabels = {days:'days',weeks:'weeks',months_lt1:'months (less than 1 year)',years_gt1:'greater than 1 year'};
+const goalLabels = {discontinue:'full discontinuation',reduce50:'50% dose reduction',reduce75:'75% dose reduction',mme90:'reaching <90 MME/day'};
+const methodLabels = {dose:'reducing dose amount at each interval',freq:'reducing dose frequency at each interval (e.g., TID → BID → QD)',qty:'reducing monthly quantity dispensed; patient instructed to use fewer doses on good days'};
+const durationVelocity = {days:{pct:0.35,intervalWeeks:0.14,label:'Fastest — 20–50%/day',intervalLabel:'daily'},weeks:{pct:0.15,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},months_lt1:{pct:0.125,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},years_gt1:{pct:0.06,intervalWeeks:6,label:'Slowest — 2–10%/1–2 months',intervalLabel:'every 6 weeks'}};
+const overrideVelocity = {slowest:{pct:0.06,intervalWeeks:6,label:'Slowest — 2–5%/1–2 months',intervalLabel:'every 6 weeks'},slow:{pct:0.125,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},fast:{pct:0.15,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},fastest:{pct:0.35,intervalWeeks:0.14,label:'Fastest — 20–50%/day',intervalLabel:'daily'}};
+
+let currentNoteText = '';
+let currentPatientHTML = '';
+// Store provider selections for overshoot steps: stepIndex -> {dose, freq, mme}
+let stepSelections = {};
+
 function getStrengths(drug) {
   const base = BASE_STRENGTHS[drug] || [];
   if (!canCut[drug]) return base;
   const halves = base.map(s => s / 2);
-  return [...new Set([...halves, ...base])].sort((a, b) => a - b);
+  return [...new Set([...halves, ...base])].sort((a,b) => a - b);
 }
 
-// Format dose label including half-tablet notation
 function doseLabel(drug, dose) {
   const base = BASE_STRENGTHS[drug] || [];
   if (!canCut[drug]) return `${dose} mg`;
-  // Check if this dose is a half of any base tablet
-  const parentTablet = base.find(s => Math.abs(s / 2 - dose) < 0.01);
-  if (parentTablet) return `${dose} mg (½ of a ${parentTablet} mg tablet)`;
+  const parent = base.find(s => Math.abs(s/2 - dose) < 0.01);
+  if (parent) return `${dose} mg (½ of a ${parent} mg tablet)`;
   return `${dose} mg`;
 }
 
-const drugLabels = {
-  morphine:'Morphine IR', morphine_er:'Morphine ER',
-  oxycodone:'Oxycodone IR', oxycodone_er:'Oxycodone ER',
-  hydrocodone:'Hydrocodone IR', hydrocodone_er:'Hydrocodone ER',
-  hydromorphone:'Hydromorphone IR', hydromorphone_er:'Hydromorphone ER',
-  tramadol:'Tramadol IR', tramadol_er:'Tramadol ER',
-  codeine:'Codeine IR', methadone:'Methadone IR',
-  methadone_dispersible:'Methadone 40 mg dispersible',
-  fentanyl:'Fentanyl patch', buprenorphine:'Buprenorphine patch'
-};
-
-const durationLabels = {days:'days',weeks:'weeks',months_lt1:'months (less than 1 year)',years_gt1:'greater than 1 year'};
-const goalLabels = {discontinue:'full discontinuation',reduce50:'50% dose reduction',reduce75:'75% dose reduction',mme90:'reaching <90 MME/day'};
-const methodLabels = {dose:'reducing dose amount at each interval',freq:'reducing dose frequency at each interval (e.g., TID → BID → QD)',qty:'reducing monthly quantity dispensed; patient instructed to use fewer doses on good days'};
-const durationVelocity = {
-  days:       {pct:0.35, intervalWeeks:0.14, label:'Fastest — 20–50%/day',       intervalLabel:'daily'},
-  weeks:      {pct:0.15, intervalWeeks:1,    label:'Fast — 10–20%/week',          intervalLabel:'weekly'},
-  months_lt1: {pct:0.125,intervalWeeks:4,    label:'Slow — 5–20%/4 weeks',        intervalLabel:'every 4 weeks'},
-  years_gt1:  {pct:0.06, intervalWeeks:6,    label:'Slowest — 2–10%/1–2 months',  intervalLabel:'every 6 weeks'}
-};
-const overrideVelocity = {
-  slowest:{pct:0.06, intervalWeeks:6,    label:'Slowest — 2–5%/1–2 months', intervalLabel:'every 6 weeks'},
-  slow:   {pct:0.125,intervalWeeks:4,    label:'Slow — 5–20%/4 weeks',      intervalLabel:'every 4 weeks'},
-  fast:   {pct:0.15, intervalWeeks:1,    label:'Fast — 10–20%/week',        intervalLabel:'weekly'},
-  fastest:{pct:0.35, intervalWeeks:0.14, label:'Fastest — 20–50%/day',      intervalLabel:'daily'}
-};
-
-let currentNoteText = '';
-let currentPatientHTML = '';
-
-function snapToStrength(drug, calculatedDose, roundDir) {
+function snapToStrength(drug, rawDose, roundDir) {
   const strengths = getStrengths(drug);
-  if (!strengths.length) return calculatedDose;
+  if (!strengths.length) return rawDose;
   if (roundDir === 'down') {
-    const lower = [...strengths].reverse().find(s => s <= calculatedDose + 0.001);
+    const lower = [...strengths].reverse().find(s => s <= rawDose + 0.001);
     return lower !== undefined ? lower : strengths[0];
   } else {
-    const upper = strengths.find(s => s >= calculatedDose - 0.001);
+    const upper = strengths.find(s => s >= rawDose - 0.001);
     return upper !== undefined ? upper : strengths[strengths.length - 1];
   }
+}
+
+// Find best frequency-adjusted option: try increasing freq (up to currentFreq * 2, max 6 = Q4)
+// Returns {dose, freq, mme, isHalf} closest to targetMME without exceeding currentMME
+function findFreqAdjustedOption(drug, targetMME, currentMME, currentFreq, mmeConv, rounding) {
+  const maxFreq = Math.min(currentFreq * 2, 6);
+  let best = null;
+  for (let f = currentFreq + 1; f <= maxFreq; f++) {
+    const rawDose = targetMME / mmeConv / f;
+    const snapped = snapToStrength(drug, rawDose, rounding);
+    const snappedMME = snapped * f * mmeConv;
+    if (snappedMME >= currentMME) continue; // must be a reduction
+    const diff = Math.abs(snappedMME - targetMME);
+    if (!best || diff < Math.abs(best.mme - targetMME)) {
+      best = { dose: snapped, freq: f, mme: snappedMME, drug: drug };
+    }
+  }
+  return best;
 }
 
 function switchView(view) {
@@ -371,6 +410,272 @@ function validateFreq(freq) {
   else { input.classList.remove('error'); error.classList.remove('visible'); }
 }
 
+// Store alt options by step index to avoid passing complex objects via onclick
+const altOptionsStore = {};
+
+function selectAlt(stepIdx, optionIdx) {
+  const allOptions = altOptionsStore[stepIdx];
+  if (!allOptions) return;
+  // Store selection BEFORE renderSchedule so pre-population check sees it
+  stepSelections[stepIdx] = allOptions[optionIdx];
+  recomputeFromStep(stepIdx);
+  // Temporarily freeze the selection so renderSchedule pre-pop doesn't overwrite it
+  const frozen = stepSelections[stepIdx];
+  renderSchedule();
+  // Restore after renderSchedule in case pre-pop overwrote it
+  stepSelections[stepIdx] = frozen;
+  // Re-render patient/note with correct selection
+  buildPatientAndNote();
+}
+
+function recomputeFromStep(fromIdx) {
+  if (!_state) return;
+  const { pct, targetMME, rounding } = _state;
+  const displaySteps = _state.displaySteps;
+
+  // Determine the active drug/freq/mme coming out of fromIdx
+  const fromSel = stepSelections[fromIdx];
+  const fromStep = displaySteps[fromIdx];
+  let prevMME = fromSel ? fromSel.mme : fromStep.endMME;
+  // Carry forward the displayDrug/displayFreq from the selected or default step
+  let activeDrug = fromSel ? (fromSel.drug || fromStep.displayDrug || _state.drug) : (fromStep.displayDrug || _state.drug);
+  let activeFreq = fromSel ? fromSel.freq : (fromStep.displayFreq || _state.freq);
+  let activeMmeConv = MME[activeDrug] || 1;
+  let prevSnappedDose = fromSel ? fromSel.dose : fromStep.snappedDose;
+  // Debug
+
+  for (let i = fromIdx + 1; i < displaySteps.length; i++) {
+    delete stepSelections[i];
+    const s = displaySteps[i];
+    const current = prevMME;
+    const activeMinStrength = getStrengths(activeDrug)[0] || 0;
+    const next = Math.max(targetMME, current - current * pct);
+    const rawDose = next / activeMmeConv / activeFreq;
+
+    let snappedDose;
+    if (_state.goal === 'discontinue' && rawDose < activeMinStrength) {
+      snappedDose = 0;
+    } else {
+      snappedDose = snapToStrength(activeDrug, rawDose, rounding);
+    }
+
+    const snappedMME = snappedDose * activeFreq * activeMmeConv;
+    const actualReductionPct = current > 0 ? (current - snappedMME) / current : 0;
+    const overshoot = !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > pct + 0.05;
+    let freqOption = null;
+    if (overshoot && canCut[activeDrug]) {
+      freqOption = findFreqAdjustedOption(activeDrug, next, current, activeFreq, activeMmeConv, rounding);
+    }
+    const stuck = snappedDose > 0 && snappedDose >= prevSnappedDose && i > fromIdx + 1;
+
+    displaySteps[i] = {
+      ...s, startMME: current, endMME: snappedMME,
+      reductionMME: current - snappedMME, snappedDose,
+      displayDrug: activeDrug, displayFreq: activeFreq,
+      stuck, overshoot, erOvershoot: false, freqOption, irSwitch: false
+    };
+    prevSnappedDose = snappedDose;
+    prevMME = snappedMME;
+  }
+}
+
+// Global state for rendering
+let _state = null;
+
+function renderSchedule() {
+  if (!_state) return;
+  const { drug, freq, mmeConv, pct, intervalWeeks, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME } = _state;
+  const drugName = drugLabels[drug];
+
+  let tableRows = displaySteps.map((s, i) => {
+    const sel = stepSelections[i];
+    const stepDrug = sel ? (sel.drug || s.displayDrug || drug) : (s.displayDrug || drug);
+    const stepFreq = sel ? sel.freq : (s.displayFreq || freq);
+    const activeDose = sel ? sel.dose : s.snappedDose;
+    const activeFreq = stepFreq;
+    const activeMME = sel ? sel.mme : s.endMME;
+    const t = stepTimeLabel(s, intervalWeeks, unit);
+    const cls = activeMME >= 90 ? 'badge-danger' : activeMME >= 50 ? 'badge-warn' : 'badge-ok';
+    const rowClass = s.irSwitch ? 'flag-row' : (s.overshoot ? 'flag-row' : (i % 2 === 1 ? 'alt-row' : ''));
+    const dl = activeDose === 0 ? 'Discontinue' : doseLabel(stepDrug, activeDose);
+    const freqStr = activeFreq === 1 ? 'once daily' : activeFreq === 2 ? 'twice daily' : activeFreq === 3 ? 'three times daily' : `${activeFreq}x daily`;
+    const irSwitchNote = s.irSwitch
+      ? `<span class="flag-cell" style="color:#0C447C;font-style:normal;"><i class="ti ti-arrows-exchange" style="font-size:12px;vertical-align:-1px;"></i> Switching to IR equivalent at same MME — allow 1 interval to stabilize before continuing taper. <button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#185FA5;font-size:11px;text-decoration:underline;padding:0;">IR taper guidance</button></span>`
+      : '';
+    const overshootNote = s.overshoot && !sel
+      ? `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> Reduction is ${Math.round((s.startMME - s.endMME)/s.startMME*100)}% — exceeds target ${Math.round(pct*100)}%. See alternatives below.</span>`
+      : (s.overshoot && sel ? `<span class="flag-cell" style="color:#3B6D11;"><i class="ti ti-check"></i> Alternative selected: ${Math.round((s.startMME - activeMME)/s.startMME*100)}% reduction</span>` : '');
+    let erOvershootNote = '';
+    if (s.erOvershoot) {
+      const irDrug = erToIR[drug];
+      const irMmeConv = irDrug ? (MME[irDrug] || 1) : mmeConv;
+      const irStrengths = irDrug ? getStrengths(irDrug) : [];
+      // Find best IR dose/freq combo closest to endMME
+      let bestIR = null;
+      if (irStrengths.length) {
+        for (let f = 1; f <= 6; f++) {
+          const rawIRDose = s.endMME / irMmeConv / f;
+          const snappedIR = snapToStrength(irDrug, rawIRDose, _state.rounding);
+          const irMME = snappedIR * f * irMmeConv;
+          if (irMME >= s.startMME) continue;
+          if (!bestIR || Math.abs(irMME - s.endMME) < Math.abs(bestIR.mme - s.endMME)) {
+            bestIR = { dose: snappedIR, freq: f, mme: irMME, drug: irDrug };
+          }
+        }
+      }
+      if (bestIR) {
+        const irFreqLabel = bestIR.freq === 1 ? 'once daily' : bestIR.freq === 2 ? 'twice daily' : bestIR.freq === 3 ? 'three times daily' : bestIR.freq + 'x daily';
+        const irDL = doseLabel(bestIR.drug, bestIR.dose);
+        erOvershootNote = `<span class="flag-cell" style="color:#0C447C;font-style:normal;">
+          <i class="ti ti-arrows-exchange" style="font-size:12px;vertical-align:-1px;"></i>
+          ER reduction exceeds target — switch to IR:
+          <strong>${drugLabels[bestIR.drug]} ${irDL} ${irFreqLabel}</strong>
+          (${Math.round(bestIR.mme)} MME/day)
+          &nbsp;<button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#185FA5;font-size:11px;text-decoration:underline;padding:0;">IR taper guidance</button>
+        </span>`;
+      } else {
+        erOvershootNote = `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> ER reduction exceeds target and no IR equivalent found. <button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:11px;text-decoration:underline;padding:0;">See terminal taper switch guidance.</button></span>`;
+      }
+    }
+    const stuckNote = s.stuck ? `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> Smallest available tablet strength reached — switch to frequency or quantity reduction</span>` : '';
+    const stepReductionAmt = Math.round(s.startMME - activeMME);
+    const stepReductionPct = s.startMME > 0 ? Math.round((s.startMME - activeMME) / s.startMME * 100) : 0;
+    const overallReductionPct = dailyMME > 0 ? Math.round((dailyMME - activeMME) / dailyMME * 100) : 0;
+    const reductionCell = s.irSwitch
+      ? '—'
+      : `−${stepReductionAmt} MME (${stepReductionPct}% from prev | ${overallReductionPct}% overall)`;
+    return `<tr class="${rowClass}"><td>${t}</td><td>${dl} × ${activeFreq}x/day${irSwitchNote}${overshootNote}${erOvershootNote}${stuckNote}</td><td>${Math.round(s.startMME)}</td><td style="font-size:12px;">${reductionCell}</td><td><span class="badge ${cls}">${Math.round(activeMME)} MME</span></td></tr>`;
+  }).join('');
+
+  if (!tableRows) tableRows = `<tr><td colspan="5" style="color:#888;text-align:center;padding:1rem;">Already at or below target.</td></tr>`;
+  const truncRow = isTruncated ? `<tr><td colspan="5" style="font-style:italic;font-size:12px;color:#888;padding:8px;">Schedule continues beyond week ${DISPLAY_WEEKS} — remaining steps to be reviewed at follow-up visits.</td></tr>` : '';
+
+  document.getElementById('schedule-wrap').innerHTML = `
+    <table><thead><tr><th>Take this dose for</th><th>Prescribed dose</th><th>MME/day (before)</th><th>Reduction</th><th>MME after step</th></tr></thead>
+    <tbody>${tableRows}${truncRow}</tbody></table>`;
+
+  // Alt panels
+  let altPanelsHTML = '';
+  displaySteps.forEach((s, i) => {
+    if (!s.overshoot || s.stuck) return;
+    const t = stepTimeLabel(s, intervalWeeks, unit);
+    const targetMME = s.startMME * (1 - pct);
+    const stepDrugAlt = s.displayDrug || drug;
+    const stepFreqAlt = s.displayFreq || freq;
+    const freqOpt = s.freqOption;
+    const overOpt = { dose: s.snappedDose, freq: stepFreqAlt, mme: s.endMME, drug: stepDrugAlt };
+    const options = freqOpt ? [freqOpt, overOpt] : [overOpt];
+    const sel = stepSelections[i];
+
+    // Store options - never auto-select, only store on explicit provider click
+    altOptionsStore[i] = options;
+    const optRows = options.map((opt, oi) => {
+      const optDrug = opt.drug || stepDrugAlt;
+      const isSelected = sel ? (sel.dose === opt.dose && sel.freq === opt.freq) : false;
+      const dl = opt.dose === 0 ? 'Discontinue' : doseLabel(optDrug, opt.dose);
+      const freqStr = opt.freq === 1 ? 'once daily' : opt.freq === 2 ? 'twice daily' : opt.freq === 3 ? 'three times daily' : `${opt.freq}x daily`;
+      const reductionPct = Math.round((s.startMME - opt.mme) / s.startMME * 100);
+      const isBest = oi === 0 && freqOpt;
+      const tag = isBest
+        ? `<span class="alt-tag alt-tag-best">Closest to target</span>`
+        : `<span class="alt-tag alt-tag-over">Overshoots — ${reductionPct}% reduction</span>`;
+      const detail = isBest
+        ? `${Math.round(opt.mme)} MME/day — ${reductionPct}% reduction (${opt.freq}x daily using pill cutter)`
+        : `${Math.round(opt.mme)} MME/day — next available tablet strength at current frequency`;
+      return `<div class="alt-option${isSelected?' selected':''}" onclick="selectAlt(${i},${oi})">
+        <div class="alt-radio${isSelected?' checked':''}"></div>
+        <div class="alt-body">
+          <div class="alt-dose">${dl} × ${opt.freq}x/day ${tag}</div>
+          <div class="alt-detail">${detail}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    altPanelsHTML += `<div class="alt-panel">
+      <div class="alt-panel-header">
+        <i class="ti ti-adjustments-horizontal" style="font-size:16px;color:#854F0B;flex-shrink:0;" aria-hidden="true"></i>
+        <div>
+          <div class="alt-panel-title">Alternatives for ${t} — target reduction is ~${Math.round(pct*100)}% (~${Math.round(targetMME)} MME/day)</div>
+          <div class="alt-panel-sub">No single tablet strength achieves the target. Select the option that best fits this patient.</div>
+        </div>
+      </div>
+      ${optRows}
+    </div>`;
+  });
+  document.getElementById('alt-panels-wrap').innerHTML = altPanelsHTML;
+
+  // Rebuild patient + note with current selections
+  buildPatientAndNote();
+}
+
+function buildPatientAndNote() {
+  if (!_state) return;
+  const { drug, freq, mmeConv, pct, intervalWeeks, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME, targetMME, duration, goal, age, dose, nextVisitLabel } = _state;
+  const drugName = drugLabels[drug];
+  const freqLabel = freq === 1 ? 'once daily' : freq === 2 ? 'twice daily' : freq === 3 ? 'three times daily' : `${freq}x daily`;
+
+  const patientIntro = `Your care team has created a plan to slowly reduce your ${drugName} dose. The schedule below covers the first ${DISPLAY_WEEKS} weeks. Your doctor will review your progress at each visit and provide updated steps. Do not skip ahead — go at this pace unless your doctor tells you otherwise.`;
+  let patientStepsHTML = '', printSteps = '', schedHTML = '', schedPlain = '';
+
+  displaySteps.filter(s => !s.stuck).forEach((s, i) => {
+    const sel = stepSelections[i];
+    // If provider selected an alternative, use that drug/freq; else use the step's displayDrug/displayFreq
+    const stepDrug = sel ? (sel.drug || s.displayDrug || drug) : (s.displayDrug || drug);
+    const stepFreq = sel ? sel.freq : (s.displayFreq || freq);
+    const activeDose = sel ? sel.dose : s.snappedDose;
+    const activeFreq = stepFreq;
+    const activeMME = sel ? sel.mme : s.endMME;
+    const t = stepTimeLabel(s, intervalWeeks, unit);
+    const tPatient = t.replace('–', ' through ');
+    const dl = activeDose === 0 ? 'Discontinue' : doseLabel(stepDrug, activeDose);
+    const stepDrugName = drugLabels[stepDrug] || drugName;
+    const aFreqLabel = activeFreq === 1 ? 'once daily' : activeFreq === 2 ? 'twice daily' : activeFreq === 3 ? 'three times daily' : `${activeFreq}x daily`;
+    const sc = activeMME >= 90 ? 'step-danger' : activeMME >= 50 ? 'step-warn' : 'step-ok';
+    const pc = activeMME >= 90 ? 'danger' : activeMME >= 50 ? 'warn' : 'ok';
+
+    patientStepsHTML += `<div class="patient-step ${sc}"><div class="patient-step-header">Step ${i + 1}: ${tPatient}</div><div class="patient-step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+    printSteps += `<div class="step ${pc}"><div class="step-header">Step ${i + 1}: ${tPatient}</div><div class="step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+    schedHTML += `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;${t}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)</div>`;
+    schedPlain += `  ${t}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)\n`;
+  });
+
+  const patientContinue = isTruncated
+    ? `<div class="patient-step step-ok" style="background:#fafafa;"><div class="patient-step-header">Next steps</div><div class="patient-step-dose">Your care team will review your progress and provide updated dosing instructions at your follow-up visit.</div></div>`
+    : `<div class="patient-step step-ok"><div class="patient-step-header">Final step: stop ${drugName}</div><div class="patient-step-dose">Do not take any more doses after this point. Contact your care team if you have questions.</div></div>`;
+  const printContinue = isTruncated
+    ? `<div class="step ok"><div class="step-header">Next steps</div><div class="step-dose">Your care team will review your progress and provide updated dosing instructions at your follow-up visit.</div></div>`
+    : `<div class="step ok"><div class="step-header">Final step: stop ${drugName}</div><div class="step-dose">Do not take any more doses. Contact your care team if you have questions.</div></div>`;
+
+  document.getElementById('patient-wrap').innerHTML = `<div class="patient-intro">${patientIntro}</div>${patientStepsHTML}${patientContinue}<div class="patient-footer">Call your care team if you experience: anxiety, sweating, nausea, muscle aches, trouble sleeping, or feel like something is wrong. Your taper can be slowed or paused — you do not need to push through symptoms alone.</div>`;
+  currentPatientHTML = `<h1>Medication Taper Schedule</h1><p class="subtitle">Prepared by your care team — first ${DISPLAY_WEEKS} weeks</p><div class="intro">${patientIntro}</div>${printSteps}${printContinue}<div class="footer">Call your care team if you experience: anxiety, sweating, nausea, muscle aches, trouble sleeping, or feel like something is wrong. Your taper can be slowed or paused.</div>`;
+
+  const truncSuffixHTML = isTruncated ? `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;font-style:italic;">&nbsp;&nbsp;Schedule continues — remaining steps to be reviewed at each follow-up visit based on patient response.</div>` : `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;After final step: discontinue ${drugName}</div>`;
+  const truncSuffixPlain = isTruncated ? `  Schedule continues — remaining steps to be reviewed at each follow-up visit based on patient response.\n` : `  After final step: discontinue ${drugName}\n`;
+
+  const ph = t => `<span style="background:#FAEEDA;color:#633806;border-radius:3px;padding:0 3px;font-style:italic;">[${t}]</span>`;
+  const nxHTML = dailyMME >= 50 ? `<p style="margin:0 0 8px;">Naloxone prescribed today. Patient and ${ph('household member name/relationship')} educated on recognition of opioid overdose signs and naloxone administration technique.</p>` : '';
+  const nxPlain = dailyMME >= 50 ? `Naloxone prescribed today. Patient and [HOUSEHOLD MEMBER] educated on recognition of opioid overdose signs and naloxone administration technique.\n\n` : '';
+  const laHTML = _state.longActing ? `<p style="margin:0 0 8px;">Given long-acting formulation, plan to convert to IR equivalent prior to final taper steps to allow for more precise dose reduction.</p>` : '';
+  const laPlain = _state.longActing ? `Given long-acting formulation, plan to convert to IR equivalent prior to final taper steps to allow for more precise dose reduction.\n\n` : '';
+
+  document.getElementById('note-rendered').innerHTML = `
+    <p style="margin:0 0 10px;"><strong>OPIOID TAPER PLAN</strong></p>
+    <p style="margin:0 0 8px;">Current regimen: ${drugName} ${dose} mg ${freqLabel} (${Math.round(dailyMME)} MME/day). Patient has been on chronic opioid therapy for ${durationLabels[duration]}. Risks and benefits of continued opioid therapy reviewed with patient today, including risks of sedation, overdose, dependence, and hormonal and immune effects with long-term use. Patient verbalized understanding. PDMP reviewed. ${ph('UDS: pending / resulted as ___')}.</p>
+    <p style="margin:0 0 8px;">Shared decision-making discussion held regarding opioid dose reduction. Goal of taper is ${goalLabels[goal]} (target: ${Math.round(targetMME)} MME/day). Patient is in agreement with taper plan as outlined below. Patient was advised that the taper may be paused or slowed at any time based on their response, and that the goal is improved safety and function — not necessarily complete discontinuation.</p>
+    <p style="margin:0 0 6px;">Taper plan: ${drugName} will be tapered by approximately ${Math.round(pct * 100)}% ${_state.intervalLabel} by ${methodLabels[method]}. Estimated total duration: ${totalDurLabel}. Schedule for first ${DISPLAY_WEEKS} weeks provided below; progress will be re-evaluated and schedule updated at each visit:</p>
+    <div style="margin:0 0 10px;">${schedHTML}${truncSuffixHTML}</div>
+    ${nxHTML}${laHTML}
+    <p style="margin:0;">Patient instructed to contact clinic if experiencing withdrawal symptoms including anxiety, diaphoresis, nausea, myalgias, or insomnia. ${ph('Pain agreement reviewed: yes / no')}. Follow-up scheduled ${nextVisitLabel}.</p>`;
+
+  currentNoteText = `OPIOID TAPER PLAN\n\nCurrent regimen: ${drugName} ${dose} mg ${freqLabel} (${Math.round(dailyMME)} MME/day). Patient has been on chronic opioid therapy for ${durationLabels[duration]}. Risks and benefits of continued opioid therapy reviewed with patient today, including risks of sedation, overdose, dependence, and hormonal and immune effects with long-term use. Patient verbalized understanding. PDMP reviewed. [UDS: pending / resulted as ___].\n\nShared decision-making discussion held regarding opioid dose reduction. Goal of taper is ${goalLabels[goal]} (target: ${Math.round(targetMME)} MME/day). Patient is in agreement with taper plan as outlined below. Patient was advised that the taper may be paused or slowed at any time based on their response, and that the goal is improved safety and function — not necessarily complete discontinuation.\n\nTaper plan: ${drugName} will be tapered by approximately ${Math.round(pct * 100)}% ${_state.intervalLabel} by ${methodLabels[method]}. Estimated total duration: ${totalDurLabel}. Schedule for first ${DISPLAY_WEEKS} weeks provided below; progress will be re-evaluated and schedule updated at each visit:\n${schedPlain}${truncSuffixPlain}\n${nxPlain}${laPlain}Patient instructed to contact clinic if experiencing withdrawal symptoms including anxiety, diaphoresis, nausea, myalgias, or insomnia. [Pain agreement reviewed: yes / no]. Follow-up scheduled ${nextVisitLabel}.`;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('terminal-modal')) {
+    document.getElementById('terminal-modal').classList.remove('open');
+  }
+}
+
 function recalc() {
   const drug = document.getElementById('drug').value;
   const dose = parseFloat(document.getElementById('dose').value) || 0;
@@ -384,6 +689,9 @@ function recalc() {
   const rounding = document.getElementById('rounding').value;
 
   validateFreq(freq);
+
+  // Reset selections when inputs change
+  stepSelections = {};
 
   const mmeConv = MME[drug] || 1;
   const longActing = !!isLA[drug];
@@ -402,23 +710,76 @@ function recalc() {
   const allSteps = [];
   let current = dailyMME, stepNum = 0;
   let prevSnappedDose = dose;
+  let activeDrug = drug;
+  let activeMmeConv = mmeConv;
+  let activeFreq = freq;
+  let switchedToIR = false;
 
   while (current > targetMME + 0.01 && stepNum < 80) {
+    const activeMinStrength = getStrengths(activeDrug)[0] || 0;
     const next = Math.max(targetMME, current - current * pct);
-    const rawDosePerAdmin = next / mmeConv / freq;
+    const rawDosePerAdmin = next / activeMmeConv / activeFreq;
 
-    // If next is below minimum tablet, set to 0 (discontinue) or min
     let snappedDose;
-    if (goal === 'discontinue' && rawDosePerAdmin < minStrength) {
+    if (goal === 'discontinue' && rawDosePerAdmin < activeMinStrength) {
       snappedDose = 0;
     } else {
-      snappedDose = snapToStrength(drug, rawDosePerAdmin, rounding);
+      snappedDose = snapToStrength(activeDrug, rawDosePerAdmin, rounding);
     }
 
-    const snappedMME = snappedDose * freq * mmeConv;
+    const snappedMME = snappedDose * activeFreq * activeMmeConv;
     const stuck = snappedDose > 0 && snappedDose >= prevSnappedDose && stepNum > 0;
+    const actualReductionPct = current > 0 ? (current - snappedMME) / current : 0;
 
-    allSteps.push({ step: stepNum, startMME: current, endMME: snappedMME, reductionMME: current - snappedMME, snappedDose, stuck });
+    // ER overshoot: insert IR hold step at same MME, then continue tapering as IR
+    const erOvershootCheck = !stuck && !switchedToIR && isLA[activeDrug] && erToIR[activeDrug]
+      && snappedDose > 0 && actualReductionPct > pct + 0.05;
+
+    if (erOvershootCheck) {
+      const irDrug = erToIR[activeDrug];
+      const irMmeConv = MME[irDrug] || 1;
+      let bestIR = null;
+      for (let f = 1; f <= 6; f++) {
+        const rawIR = current / irMmeConv / f;
+        const snappedIR = snapToStrength(irDrug, rawIR, 'down');
+        const irMME = snappedIR * f * irMmeConv;
+        if (irMME > current + 0.01) continue;
+        if (!bestIR || Math.abs(irMME - current) < Math.abs(bestIR.mme - current)) {
+          bestIR = { dose: snappedIR, freq: f, mme: irMME, drug: irDrug };
+        }
+      }
+      if (bestIR) {
+        allSteps.push({
+          step: stepNum, startMME: current, endMME: bestIR.mme,
+          reductionMME: current - bestIR.mme, snappedDose: bestIR.dose,
+          displayFreq: bestIR.freq, displayDrug: bestIR.drug,
+          stuck: false, overshoot: false, erOvershoot: false, freqOption: null,
+          irSwitch: true
+        });
+        stepNum++;
+        activeDrug = irDrug;
+        activeMmeConv = irMmeConv;
+        activeFreq = bestIR.freq;
+        prevSnappedDose = bestIR.dose;
+        current = bestIR.mme;
+        switchedToIR = true;
+        continue;
+      }
+    }
+
+    const overshoot = !stuck && !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > pct + 0.05;
+    const erOvershoot = false;
+    let freqOption = null;
+    if (overshoot && canCut[activeDrug]) {
+      freqOption = findFreqAdjustedOption(activeDrug, next, current, activeFreq, activeMmeConv, rounding);
+    }
+
+    allSteps.push({
+      step: stepNum, startMME: current, endMME: snappedMME,
+      reductionMME: current - snappedMME, snappedDose,
+      displayFreq: activeFreq, displayDrug: activeDrug,
+      stuck, overshoot, erOvershoot, freqOption, irSwitch: false
+    });
 
     if (stuck) break;
     prevSnappedDose = snappedDose;
@@ -429,16 +790,14 @@ function recalc() {
 
   const totalWeeks = allSteps.length * intervalWeeks;
   const totalDurLabel = formatDuration(totalWeeks);
-  const freqLabel = freq === 1 ? 'once daily' : freq === 2 ? 'twice daily' : freq === 3 ? 'three times daily' : `${freq}x daily`;
   const nextVisitLabel = intervalWeeks < 1 ? 'in 1–2 days' : intervalWeeks <= 1 ? 'in 1 week' : intervalWeeks <= 4 ? 'in 4 weeks' : 'in 6 weeks';
-  const drugName = drugLabels[drug];
 
   const displaySteps = truncateToWeeks(allSteps, intervalWeeks, DISPLAY_WEEKS);
   const isTruncated = displaySteps.length < allSteps.length;
   const hasStuck = allSteps.some(s => s.stuck);
 
   document.getElementById('velocity-banner').innerHTML = `<div class="info-banner"><strong>Recommended velocity:</strong> ${label} — ${intervalLabel}${velocityOverride !== 'auto' ? ' <em>(provider override)</em>' : ''}</div>`;
-  document.getElementById('la-note').innerHTML = longActing ? `<div class="la-steps"><strong>Long-acting opioid — recommended approach:</strong><br>1. Convert 50–75% of total daily MME to an IR equivalent; taper IR portion first.<br>2. Once IR is discontinued, taper the remaining LA dose per the schedule below.<br>3. Alternatively, convert entire dose to IR equivalent and taper that.<br>4. Patches (fentanyl/buprenorphine): step down through available strengths or convert to oral IR.</div>` : '';
+  document.getElementById('la-note').innerHTML = longActing ? `<div style="margin-bottom:0.75rem;"><button class="modal-trigger" onclick="document.getElementById('terminal-modal').classList.add('open')"><i class="ti ti-info-circle" style="font-size:13px;"></i> Terminal taper switch: ER to IR guidance</button></div>` : '';
 
   document.getElementById('metrics').innerHTML = `
     <div class="metric"><div class="metric-label">Starting MME/day</div><div class="metric-value">${Math.round(dailyMME)}</div><div class="metric-unit">morphine mg equivalents</div></div>
@@ -456,76 +815,16 @@ function recalc() {
   if (drug === 'fentanyl' || drug === 'buprenorphine') warnings.push({level:'warn', text:'Patch formulation: step down through available strengths or convert to oral IR for finer dose control.'});
   if (age === 'elderly') warnings.push({level:'warn', text:'Elderly patient: use slowest taper velocity. Increased fall, sedation, and withdrawal risk.'});
   if (intervalWeeks < 1) warnings.push({level:'warn', text:'Daily taper appropriate for acute/recent-onset only. Ensure close monitoring.'});
-  if (hasStuck) warnings.push({level:'warn', text:`No further dose reduction is possible at available ${drugName} tablet strengths. Consider switching taper method to "reduce dose frequency" or "reduce monthly quantity dispensed" to continue the taper.`});
+  if (hasStuck) warnings.push({level:'warn', text:`No further dose reduction is possible at available ${drugLabels[drug]} tablet strengths. Consider switching taper method to "reduce dose frequency" or "reduce monthly quantity dispensed."`});
   document.getElementById('warning-box').innerHTML = warnings.map(w => `<div class="warn-box ${w.level === 'danger' ? 'warn-danger' : 'warn-warn'}">${w.text}</div>`).join('');
-
-  // Provider schedule
-  let tableRows = displaySteps.map((s, i) => {
-    const t = stepTimeLabel(s, intervalWeeks, unit);
-    const cls = s.endMME >= 90 ? 'badge-danger' : s.endMME >= 50 ? 'badge-warn' : 'badge-ok';
-    const rowClass = s.stuck ? 'flag-row' : (i % 2 === 1 ? 'alt-row' : '');
-    const dl = s.snappedDose === 0 ? 'Discontinue' : doseLabel(drug, s.snappedDose);
-    const stuckNote = s.stuck ? `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> Smallest available tablet strength reached — switch to frequency or quantity reduction to continue taper</span>` : '';
-    return `<tr class="${rowClass}"><td>${t}</td><td>${dl} × ${freq}x/day${stuckNote}</td><td>${Math.round(s.startMME)}</td><td>−${Math.round(s.reductionMME)} (${s.startMME > 0 ? Math.round((s.reductionMME/s.startMME)*100) : 0}%)</td><td><span class="badge ${cls}">${Math.round(s.endMME)} MME</span></td></tr>`;
-  }).join('');
-  if (!tableRows) tableRows = `<tr><td colspan="5" style="color:#888;text-align:center;padding:1rem;">Already at or below target.</td></tr>`;
-  const truncRow = isTruncated ? `<tr><td colspan="5" style="font-style:italic;font-size:12px;color:#888;padding:8px;">Schedule continues beyond week ${DISPLAY_WEEKS} — remaining steps to be reviewed at follow-up visits.</td></tr>` : '';
-  document.getElementById('schedule-wrap').innerHTML = `
-    <table><thead><tr><th>Take this dose for</th><th>Prescribed dose</th><th>MME/day (before)</th><th>Reduction</th><th>MME after step</th></tr></thead>
-    <tbody>${tableRows}${truncRow}</tbody></table>`;
 
   const methodNote = {dose:'Reduce dose amount at each interval. When smallest available tablet unit is reached, switch to reducing frequency or monthly quantity.',freq:'Reduce number of daily doses at each interval (e.g., TID → BID → QD).',qty:'Reduce total monthly quantity by the target %. Instruct patient to use fewer doses on "good days."'};
   document.getElementById('clinical-note').innerHTML = `<strong>Method:</strong> ${methodNote[method]}<br><br><strong>Reminder:</strong> Schedule above covers the first ${DISPLAY_WEEKS} weeks. Estimated total taper duration: ${totalDurLabel}. Progress will be re-evaluated at each visit — taper velocity, dose, and schedule will be adjusted based on patient response. Pause or slow if withdrawal symptoms, functional decline, or psychological distress emerge. Dose reduction alone is a valid goal. Obtain patient agreement before initiating and document all conversations.`;
 
-  // Patient schedule
-  const patientIntro = `Your care team has created a plan to slowly reduce your ${drugName} dose. The schedule below covers the first ${DISPLAY_WEEKS} weeks. Your doctor will review your progress at each visit and provide updated steps. Do not skip ahead — go at this pace unless your doctor tells you otherwise.`;
-  let patientStepsHTML = '', printSteps = '';
-  displaySteps.filter(s => !s.stuck).forEach((s, i) => {
-    const t = stepTimeLabel(s, intervalWeeks, unit).replace('–', ' through ');
-    const sc = s.endMME >= 90 ? 'step-danger' : s.endMME >= 50 ? 'step-warn' : 'step-ok';
-    const pc = s.endMME >= 90 ? 'danger' : s.endMME >= 50 ? 'warn' : 'ok';
-    const dl = s.snappedDose === 0 ? 'Discontinue' : doseLabel(drug, s.snappedDose);
-    patientStepsHTML += `<div class="patient-step ${sc}"><div class="patient-step-header">Step ${i + 1}: ${t}</div><div class="patient-step-dose">Take ${drugName} <strong>${dl}</strong> — ${freqLabel}</div></div>`;
-    printSteps += `<div class="step ${pc}"><div class="step-header">Step ${i + 1}: ${t}</div><div class="step-dose">Take ${drugName} <strong>${dl}</strong> — ${freqLabel}</div></div>`;
-  });
+  // Store state for re-rendering on selection change
+  _state = { drug, dose, freq, mmeConv, pct, intervalWeeks, intervalLabel, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME, targetMME, duration, goal, age, nextVisitLabel, longActing, rounding };
 
-  const patientContinue = isTruncated
-    ? `<div class="patient-step step-ok" style="background:#fafafa;"><div class="patient-step-header">Next steps</div><div class="patient-step-dose">Your care team will review your progress and provide updated dosing instructions at your follow-up visit.</div></div>`
-    : `<div class="patient-step step-ok"><div class="patient-step-header">Final step: stop ${drugName}</div><div class="patient-step-dose">Do not take any more doses after this point. Contact your care team if you have questions.</div></div>`;
-  const printContinue = isTruncated
-    ? `<div class="step ok"><div class="step-header">Next steps</div><div class="step-dose">Your care team will review your progress and provide updated dosing instructions at your follow-up visit.</div></div>`
-    : `<div class="step ok"><div class="step-header">Final step: stop ${drugName}</div><div class="step-dose">Do not take any more doses. Contact your care team if you have questions.</div></div>`;
-
-  document.getElementById('patient-wrap').innerHTML = `<div class="patient-intro">${patientIntro}</div>${patientStepsHTML}${patientContinue}<div class="patient-footer">Call your care team if you experience: anxiety, sweating, nausea, muscle aches, trouble sleeping, or feel like something is wrong. Your taper can be slowed or paused — you do not need to push through symptoms alone.</div>`;
-  currentPatientHTML = `<h1>Medication Taper Schedule</h1><p class="subtitle">Prepared by your care team — first ${DISPLAY_WEEKS} weeks</p><div class="intro">${patientIntro}</div>${printSteps}${printContinue}<div class="footer">Call your care team if you experience: anxiety, sweating, nausea, muscle aches, trouble sleeping, or feel like something is wrong. Your taper can be slowed or paused.</div>`;
-
-  // Chart note
-  let schedHTML = '', schedPlain = '';
-  displaySteps.filter(s => !s.stuck).forEach(s => {
-    const t = stepTimeLabel(s, intervalWeeks, unit);
-    const dl = s.snappedDose === 0 ? 'Discontinue' : doseLabel(drug, s.snappedDose);
-    schedHTML += `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;${t}: ${drugName} ${dl} ${freqLabel} (${Math.round(s.endMME)} MME/day)</div>`;
-    schedPlain += `  ${t}: ${drugName} ${dl} ${freqLabel} (${Math.round(s.endMME)} MME/day)\n`;
-  });
-  const truncSuffixHTML = isTruncated ? `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;font-style:italic;">&nbsp;&nbsp;Schedule continues — remaining steps to be reviewed at each follow-up visit based on patient response.</div>` : `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;After final step: discontinue ${drugName}</div>`;
-  const truncSuffixPlain = isTruncated ? `  Schedule continues — remaining steps to be reviewed at each follow-up visit based on patient response.\n` : `  After final step: discontinue ${drugName}\n`;
-
-  const ph = t => `<span style="background:#FAEEDA;color:#633806;border-radius:3px;padding:0 3px;font-style:italic;">[${t}]</span>`;
-  const nxHTML = dailyMME >= 50 ? `<p style="margin:0 0 8px;">Naloxone prescribed today. Patient and ${ph('household member name/relationship')} educated on recognition of opioid overdose signs and naloxone administration technique.</p>` : '';
-  const nxPlain = dailyMME >= 50 ? `Naloxone prescribed today. Patient and [HOUSEHOLD MEMBER] educated on recognition of opioid overdose signs and naloxone administration technique.\n\n` : '';
-  const laHTML = longActing ? `<p style="margin:0 0 8px;">Given long-acting formulation, plan to convert to IR equivalent prior to final taper steps to allow for more precise dose reduction.</p>` : '';
-  const laPlain = longActing ? `Given long-acting formulation, plan to convert to IR equivalent prior to final taper steps to allow for more precise dose reduction.\n\n` : '';
-
-  document.getElementById('note-rendered').innerHTML = `
-    <p style="margin:0 0 10px;"><strong>OPIOID TAPER PLAN</strong></p>
-    <p style="margin:0 0 8px;">Current regimen: ${drugName} ${dose} mg ${freqLabel} (${Math.round(dailyMME)} MME/day). Patient has been on chronic opioid therapy for ${durationLabels[duration]}. Risks and benefits of continued opioid therapy reviewed with patient today, including risks of sedation, overdose, dependence, and hormonal and immune effects with long-term use. Patient verbalized understanding. PDMP reviewed. ${ph('UDS: pending / resulted as ___')}.</p>
-    <p style="margin:0 0 8px;">Shared decision-making discussion held regarding opioid dose reduction. Goal of taper is ${goalLabels[goal]} (target: ${Math.round(targetMME)} MME/day). Patient is in agreement with taper plan as outlined below. Patient was advised that the taper may be paused or slowed at any time based on their response, and that the goal is improved safety and function — not necessarily complete discontinuation.</p>
-    <p style="margin:0 0 6px;">Taper plan: ${drugName} will be tapered by approximately ${Math.round(pct * 100)}% ${intervalLabel} by ${methodLabels[method]}. Estimated total duration: ${totalDurLabel}. Schedule for first ${DISPLAY_WEEKS} weeks provided below; progress will be re-evaluated and schedule updated at each visit:</p>
-    <div style="margin:0 0 10px;">${schedHTML}${truncSuffixHTML}</div>
-    ${nxHTML}${laHTML}
-    <p style="margin:0;">Patient instructed to contact clinic if experiencing withdrawal symptoms including anxiety, diaphoresis, nausea, myalgias, or insomnia. ${ph('Pain agreement reviewed: yes / no')}. Follow-up scheduled ${nextVisitLabel}.</p>`;
-
-  currentNoteText = `OPIOID TAPER PLAN\n\nCurrent regimen: ${drugName} ${dose} mg ${freqLabel} (${Math.round(dailyMME)} MME/day). Patient has been on chronic opioid therapy for ${durationLabels[duration]}. Risks and benefits of continued opioid therapy reviewed with patient today, including risks of sedation, overdose, dependence, and hormonal and immune effects with long-term use. Patient verbalized understanding. PDMP reviewed. [UDS: pending / resulted as ___].\n\nShared decision-making discussion held regarding opioid dose reduction. Goal of taper is ${goalLabels[goal]} (target: ${Math.round(targetMME)} MME/day). Patient is in agreement with taper plan as outlined below. Patient was advised that the taper may be paused or slowed at any time based on their response, and that the goal is improved safety and function — not necessarily complete discontinuation.\n\nTaper plan: ${drugName} will be tapered by approximately ${Math.round(pct * 100)}% ${intervalLabel} by ${methodLabels[method]}. Estimated total duration: ${totalDurLabel}. Schedule for first ${DISPLAY_WEEKS} weeks provided below; progress will be re-evaluated and schedule updated at each visit:\n${schedPlain}${truncSuffixPlain}\n${nxPlain}${laPlain}Patient instructed to contact clinic if experiencing withdrawal symptoms including anxiety, diaphoresis, nausea, myalgias, or insomnia. [Pain agreement reviewed: yes / no]. Follow-up scheduled ${nextVisitLabel}.`;
+  renderSchedule();
 }
 
 recalc();
