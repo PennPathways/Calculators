@@ -58,6 +58,9 @@
   }
   .print-only { display: none; }
 
+  /* utility to hide calc groups */
+  .calc-hidden { display: none !important; }
+
   /* ── HEADER ── */
   .app-header {
     background: var(--blue-dark);
@@ -419,7 +422,7 @@
             <span class="calc-label">&lt;70 kg → give <strong>1 L</strong></span>
           </div>
           <!-- only show the calculated range when weight >= 70 kg -->
-          <div id="fluidCalcGroup" style="display:none;">
+          <div id="fluidCalcGroup" class="calc-hidden">
             <div class="calc-row">
               <span class="calc-label">≥70 kg → 15–20 mL/kg =</span>
               <span class="calc-result" id="fluidRange">***</span>
@@ -758,7 +761,7 @@
       <div class="note-card">
         <div class="note-card-head">Managing Other Electrolytes</div>
         <div class="note-card-body">
-          <p><strong>Phosphate:</strong> Urgently replete to &gt;1 mg/dL with IV therapy (potassium phosphate; or sodium phosphate if hyperkalemic). Once minimum goal met, replete to normal range[...]
+          <p><strong>Phosphate:</strong> Urgently replete to &gt;1 mg/dL with IV therapy (potassium phosphate; or sodium phosphate if hyperkalemic). Once minimum goal met, replete to normal range[...]</p>
           <p><strong>Magnesium:</strong> Urgently replete to &gt;1.2 mg/dL with IV MgSO₄. Once minimum goal met, replete to normal range with PO or IV as tolerated.</p>
         </div>
       </div>
@@ -879,99 +882,13 @@
       <button class="modal-close" onclick="closeModal('modalConsults')">×</button>
     </div>
     <div class="modal-body">
-      <p><strong>Neurology / Neurocritical Care:</strong> Consider for HHS patients with encephalopathy and suspected brain injury or cerebral edema. Rapid correction of glucose may worsen cerebr[...]
+      <p><strong>Neurology / Neurocritical Care:</strong> Consider for HHS patients with encephalopathy and suspected brain injury or cerebral edema. Rapid correction of glucose may worsen cerebr[...]</p>
       <p><strong>Diabetes / Endocrinology:</strong> Consider if available. Required (if available) when insulin infusion exceeds 30 units/hr. Required for home insulin pump patients.</p>
       <p><strong>Titration roles:</strong> Insulin and dextrose titration is nurse-driven. Electrolyte management and volume resuscitation must be directed by the provider.</p>
     </div>
   </div>
 </div>
 
-
-
-<!-- Post Resolution -->
-<div class="modal-overlay" id="modalPostRes" onclick="closeOnOverlay(event,'modalPostRes')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Post-Resolution: Routine Inpatient Diabetes Care</h3>
-      <button class="modal-close" onclick="closeModal('modalPostRes')">×</button>
-    </div>
-    <div class="modal-body">
-      <ul>
-        <li>If eating: POC BG before meals and bedtime (QAc &amp; QHs) and order prandial insulin</li>
-        <li>If NPO or on TPN/TEN: check POC BG Q4–6 hours</li>
-        <li>Order correctional insulin (formerly sliding scale) based on predicted sensitivity</li>
-        <li>Consider 3AM fingerstick the night of transition to evaluate basal insulin effects</li>
-        <li>Ensure daily basal insulin dose ordered within 24h of NOW basal insulin dose</li>
-        <li>Watch for decreasing insulin requirements as infectious precipitants and glucose toxicity improve</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Transition -->
-<div class="modal-overlay" id="modalTransition" onclick="closeOnOverlay(event,'modalTransition')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Safe IV → SQ Transition Details</h3>
-      <button class="modal-close" onclick="closeModal('modalTransition')">×</button>
-    </div>
-    <div class="modal-body">
-      <p>Due to the short half-life of IV insulin (10–15 min), subcutaneous basal insulin (glargine) <strong>must be given before discontinuing the IV infusion</strong> to avoid rebound hypergl[...]</p>
-      <ul>
-        <li>Administer glargine as soon as it is delivered from Pharmacy, once HHS resolution criteria are met</li>
-        <li>Discontinue insulin and dextrose infusions <strong>2 hours after</strong> glargine administered</li>
-        <li>If restarting patient's own pump: discontinue IV infusions <strong>1 hour after</strong> pump restarted</li>
-        <li>Consult diabetes/endocrine if patient on home insulin pump (if available)</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- IR Definition -->
-<div class="modal-overlay" id="modalIRDef" onclick="closeOnOverlay(event,'modalIRDef')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Insulin Resistance Definition</h3>
-      <button class="modal-close" onclick="closeModal('modalIRDef')">×</button>
-    </div>
-    <div class="modal-body">
-      <p><strong>Insulin Resistant</strong> (use higher dose path):</p>
-      <ul>
-        <li>BMI &gt;30 <strong>OR</strong> receiving high-dose corticosteroids</li>
-        <li><strong>AND</strong> eGFR &gt;30</li>
-      </ul>
-      <p><strong>Not Insulin Resistant</strong> (use lower dose path):</p>
-      <ul>
-        <li>BMI ≤30 <strong>AND NOT</strong> on high-dose corticosteroids</li>
-        <li><strong>OR</strong> eGFR ≤30</li>
-      </ul>
-      <p><strong>High-dose corticosteroid thresholds:</strong></p>
-      <ul>
-        <li>Prednisone ≥ 40 mg/day</li>
-        <li>Methylprednisolone ≥ 30 mg/day</li>
-        <li>Dexamethasone ≥ 6 mg/day</li>
-      </ul>
-    </div>
-  </div>
-</div>
-<div class="modal-overlay" id="modalSteroids" onclick="closeOnOverlay(event,'modalSteroids')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>High-Dose Steroid Thresholds</h3>
-      <button class="modal-close" onclick="closeModal('modalSteroids')">×</button>
-    </div>
-    <div class="modal-body">
-      <p><strong>High-dose corticosteroid thresholds:</strong></p>
-      <ul>
-        <li>Prednisone ≥ 40 mg/day</li>
-        <li>Methylprednisolone ≥ 30 mg/day</li>
-        <li>Dexamethasone ≥ 6 mg/day</li>
-      </ul>
-      <p>Insulin resistant pathway applies when: BMI &gt;30 <em>or</em> receiving high-dose corticosteroids, <em>and</em> eGFR &gt;30.</p>
-      <p>Not insulin resistant: BMI ≤30 <em>and</em> not on high-dose steroids, <em>or</em> eGFR ≤30.</p>
-    </div>
-  </div>
-</div>
 
 
 <script>
@@ -995,22 +912,33 @@
     document.getElementById('weightWarning').classList.toggle('show', wt > 120);
     document.getElementById('printWt').textContent = wt ? wt + ' kg' : '—';
 
-    set('fluidRange', wt ? r1(wt*15) + '–' + r1(wt*20) + ' mL' : '***');
-    set('fluid15',    wt ? r1(wt*15) : '***');
-    set('fluid20',    wt ? r1(wt*20) : '***');
-    set('bolusDose',    wt ? r1(wt*0.1) + ' units'    : '***');
-    set('infusionRate', wt ? r1(wt*0.1) + ' units/hr' : '***');
-    set('sensYes', wt ? r1(wt*0.1) + ' units/hr' : '***');
+    // compute fluid values
+    const f15 = (wt ? r1(wt*15) : null);
+    const f20 = (wt ? r1(wt*20) : null);
+    const fRange = (wt ? r1(wt*15) + '–' + r1(wt*20) + ' mL' : null);
 
     // Only show the fluid calculation group when weight is >= 70 kg
     const fluidGroup = document.getElementById('fluidCalcGroup');
+    const showFluid = (wt !== null && wt >= 70);
     if (fluidGroup) {
-      if (wt !== null && wt >= 70) {
-        fluidGroup.style.display = 'block';
-      } else {
-        fluidGroup.style.display = 'none';
-      }
+      fluidGroup.classList.toggle('calc-hidden', !showFluid);
     }
+
+    // set or clear fluid display values depending on visibility
+    if (showFluid) {
+      set('fluidRange', fRange);
+      set('fluid15', f15);
+      set('fluid20', f20);
+    } else {
+      set('fluidRange', '***');
+      set('fluid15', '***');
+      set('fluid20', '***');
+    }
+
+    // other weight-driven values
+    set('bolusDose',    wt ? r1(wt*0.1) + ' units'    : '***');
+    set('infusionRate', wt ? r1(wt*0.1) + ' units/hr' : '***');
+    set('sensYes', wt ? r1(wt*0.1) + ' units/hr' : '***');
 
     // ... rest of updateAll() handles other UI updates (not shown here)
   }
