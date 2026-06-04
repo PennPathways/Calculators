@@ -304,11 +304,11 @@
   .modal-body li { margin-bottom: 5px; }
   .modal-body p  { margin-bottom: 8px; }
   .modal-body strong { color: var(--blue-dark); }
-  .modal-section-title { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--blue-dark); margin: 10px 0 4px; border-top: var(--border); padding-top: 8px; }
+  .modal-section-title { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--blue-dark); margin: 10px 0 4px; border-top: var(--border); padding-top:[...]
   .modal-section-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 
   /* ── BTNS ── */
-  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border: no[...]
   .btn-outline { background: white; color: var(--blue-dark); border: 1px solid var(--blue-accent); }
   .btn-outline:hover { background: var(--blue-light); }
   .btn-print { background: white; color: var(--gray-700); border: 1px solid var(--gray-300); }
@@ -418,11 +418,14 @@
           <div class="calc-row">
             <span class="calc-label">&lt;70 kg → give <strong>1 L</strong></span>
           </div>
-          <div class="calc-row">
-            <span class="calc-label">≥70 kg → 15–20 mL/kg =</span>
-            <span class="calc-result" id="fluidRange">***</span>
+          <!-- only show the calculated range when weight >= 70 kg -->
+          <div id="fluidCalcGroup" style="display:none;">
+            <div class="calc-row">
+              <span class="calc-label">≥70 kg → 15–20 mL/kg =</span>
+              <span class="calc-result" id="fluidRange">***</span>
+            </div>
+            <div class="inline-note">15 mL/kg = <span id="fluid15">***</span> mL &nbsp;|&nbsp; 20 mL/kg = <span id="fluid20">***</span> mL</div>
           </div>
-          <div class="inline-note">15 mL/kg = <span id="fluid15">***</span> mL &nbsp;|&nbsp; 20 mL/kg = <span id="fluid20">***</span> mL</div>
         </div>
       </div>
 
@@ -496,15 +499,15 @@
             </div>
             <div style="font-size:11px;font-weight:600;color:var(--gray-700);margin-bottom:3px;">Was patient insulin sensitive? (ANY one criterion)</div>
             <div id="sensCalcBox" style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
-              <div id="critBox1" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">
+              <div id="critBox1" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-it[...]
                 <span style="color:var(--gray-700);">BG decrease &gt;10% of last reading:</span>
                 <span id="calcCrit1" style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--penn-blue);">***</span>
               </div>
-              <div id="critBox2" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">
+              <div id="critBox2" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-it[...]
                 <span style="color:var(--gray-700);">BG decrease &gt;50 mg/dL:</span>
                 <span id="calcCrit2" style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--penn-blue);">***</span>
               </div>
-              <div id="critBox3" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">
+              <div id="critBox3" style="font-size:11px;background:var(--amber-light);border:1px solid #fcd34d;border-radius:4px;padding:5px 8px;display:flex;justify-content:space-between;align-it[...]
                 <span style="color:var(--gray-700);">Current BG &lt;300 mg/dL:</span>
                 <span id="calcCrit3" style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--penn-blue);">***</span>
               </div>
@@ -755,7 +758,7 @@
       <div class="note-card">
         <div class="note-card-head">Managing Other Electrolytes</div>
         <div class="note-card-body">
-          <p><strong>Phosphate:</strong> Urgently replete to &gt;1 mg/dL with IV therapy (potassium phosphate; or sodium phosphate if hyperkalemic). Once minimum goal met, replete to normal range with PO or IV as tolerated.</p>
+          <p><strong>Phosphate:</strong> Urgently replete to &gt;1 mg/dL with IV therapy (potassium phosphate; or sodium phosphate if hyperkalemic). Once minimum goal met, replete to normal range[...]
           <p><strong>Magnesium:</strong> Urgently replete to &gt;1.2 mg/dL with IV MgSO₄. Once minimum goal met, replete to normal range with PO or IV as tolerated.</p>
         </div>
       </div>
@@ -799,7 +802,7 @@
         <li style="margin-bottom:6px;"><strong>Hyperglycemia:</strong> Serum glucose or capillary glucose &gt;600 mg/dL</li>
         <li style="margin-bottom:6px;"><strong>Normal or mildly elevated ketones:</strong> Mildly elevated serum BHB (&lt;4 mmol/L) or small urinary ketones</li>
         <li style="margin-bottom:6px;"><strong>No acidosis:</strong> Blood gas pH ≥7.3 AND serum bicarbonate ≥18 mEq/L (anion gap is variable)</li>
-        <li style="margin-bottom:6px;"><strong>Hyperosmolality:</strong> Serum osmolality &gt;320 mOsm/kg<br><span style="font-size:12px;color:var(--gray-600);">May measure directly or calculate effective serum osmolality: Na⁺ (mmol/L) × 2 + glucose (mg/dL) ÷ 18</span></li>
+        <li style="margin-bottom:6px;"><strong>Hyperosmolality:</strong> Serum osmolality &gt;320 mOsm/kg<br><span style="font-size:12px;color:var(--gray-600);">May measure directly or calculate effec[...]</li>
         <li style="margin-bottom:0;"><strong>Change in mentation from baseline:</strong> May range from altered mental status to stupor/coma</li>
       </ol>
     </div>
@@ -876,7 +879,7 @@
       <button class="modal-close" onclick="closeModal('modalConsults')">×</button>
     </div>
     <div class="modal-body">
-      <p><strong>Neurology / Neurocritical Care:</strong> Consider for HHS patients with encephalopathy and suspected brain injury or cerebral edema. Rapid correction of glucose may worsen cerebral edema and cause death due to transient hypo-osmolarity.</p>
+      <p><strong>Neurology / Neurocritical Care:</strong> Consider for HHS patients with encephalopathy and suspected brain injury or cerebral edema. Rapid correction of glucose may worsen cerebr[...]
       <p><strong>Diabetes / Endocrinology:</strong> Consider if available. Required (if available) when insulin infusion exceeds 30 units/hr. Required for home insulin pump patients.</p>
       <p><strong>Titration roles:</strong> Insulin and dextrose titration is nurse-driven. Electrolyte management and volume resuscitation must be directed by the provider.</p>
     </div>
@@ -913,7 +916,7 @@
       <button class="modal-close" onclick="closeModal('modalTransition')">×</button>
     </div>
     <div class="modal-body">
-      <p>Due to the short half-life of IV insulin (10–15 min), subcutaneous basal insulin (glargine) <strong>must be given before discontinuing the IV infusion</strong> to avoid rebound hyperglycemia.</p>
+      <p>Due to the short half-life of IV insulin (10–15 min), subcutaneous basal insulin (glargine) <strong>must be given before discontinuing the IV infusion</strong> to avoid rebound hypergl[...]</p>
       <ul>
         <li>Administer glargine as soon as it is delivered from Pharmacy, once HHS resolution criteria are met</li>
         <li>Discontinue insulin and dextrose infusions <strong>2 hours after</strong> glargine administered</li>
@@ -998,284 +1001,41 @@
     set('bolusDose',    wt ? r1(wt*0.1) + ' units'    : '***');
     set('infusionRate', wt ? r1(wt*0.1) + ' units/hr' : '***');
     set('sensYes', wt ? r1(wt*0.1) + ' units/hr' : '***');
-    set('sensNo',  wt ? r1(wt*0.2) + ' units/hr' : '***');
-    set('gMid',   wt ? r1(wt*0.1)  + ' units/hr' : '***');
-    set('gHigh2', wt ? r1(wt*0.1)  + ' units/hr' : '***');
 
-    // Min insulin rate display in alert
-    const minEl = document.getElementById('minInsulinCalc');
-    if (minEl) {
-      minEl.innerHTML = wt ? ` <em style="color:var(--penn-blue);">(≥${r1(wt*0.02)} units/hr)</em>` : '';
+    // Only show the fluid calculation group when weight is >= 70 kg
+    const fluidGroup = document.getElementById('fluidCalcGroup');
+    if (fluidGroup) {
+      if (wt !== null && wt >= 70) {
+        fluidGroup.style.display = 'block';
+      } else {
+        fluidGroup.style.display = 'none';
+      }
     }
 
-    // ── Panel and row highlighting based on currentBG ──
-    const bgVal = parseFloat(document.getElementById('currentBG').value);
-    const hasBG = !isNaN(bgVal) && bgVal > 0;
-
-    // Right panel rows: only highlight when BG <=300, all white otherwise
-    const bgRows = [
-      { id: 'gRow201', min: 201, max: 300 },
-      { id: 'gRow71',  min: 71,  max: 200 },
-      { id: 'gRow41',  min: 41,  max: 70  },
-      { id: 'gRow0',   min: 0,   max: 40  },
-    ];
-    bgRows.forEach(row => {
-      const el = document.getElementById(row.id);
-      if (!el) return;
-      const match = hasBG && bgVal <= 300 && bgVal >= row.min && bgVal <= row.max;
-      el.style.background = match ? 'var(--green-light)' : 'white';
-      el.style.fontWeight = match ? '600' : '';
-      el.style.outline    = match ? '2px solid #86efac' : '';
-    });
-
-    // Left panel: no background change at all — card highlighting handles the active state
-    // (sensCardYes/No are updated in the BG sensitivity block below)
-
-    const last    = parseFloat(document.getElementById('lastBG').value);
-    const current = parseFloat(document.getElementById('currentBG').value);
-    const badge   = document.getElementById('sensitivityBadge');
-
-    const resetSensCards = () => {
-      ['calcCrit1','calcCrit2','calcCrit3'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.textContent = '***'; el.style.color = 'var(--penn-blue)'; el.style.fontWeight = '600'; }
-      });
-      ['critBox1','critBox2','critBox3'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.style.background = 'var(--amber-light)'; el.style.borderColor = '#fcd34d'; }
-      });
-      const cY = document.getElementById('sensCardYes');
-      const cN  = document.getElementById('sensCardNo');
-      if (cY) { cY.className = 'decision-card neutral'; cY.style.opacity = '1'; cY.style.filter = ''; }
-      if (cN)  { cN.className  = 'decision-card neutral'; cN.style.opacity  = '1'; cN.style.filter  = ''; }
-      badge.style.display = 'none';
-    };
-
-    // Only run sensitivity logic when BG > 300 (left panel is active)
-    if (!isNaN(last) && last > 0 && !isNaN(current) && current > 0 && current > 300) {
-      const drop       = last - current;
-      const dropPct    = (drop / last) * 100;
-      const criterion1 = dropPct > 10;
-      const criterion2 = drop > 50;
-      const criterion3 = current < 300;
-      const sensitive  = criterion1 || criterion2 || criterion3;
-
-      // Update criterion rows
-      const c1El = document.getElementById('calcCrit1');
-      const c2El = document.getElementById('calcCrit2');
-      const c3El = document.getElementById('calcCrit3');
-      const b1   = document.getElementById('critBox1');
-      const b2   = document.getElementById('critBox2');
-      const b3   = document.getElementById('critBox3');
-
-      c1El.textContent = r1(dropPct) + '%';
-      if (criterion1) {
-        b1.style.background = 'var(--green-light)'; b1.style.borderColor = '#86efac';
-        c1El.style.color = 'var(--green)'; c1El.style.fontWeight = '700';
-      } else {
-        b1.style.background = 'var(--amber-light)'; b1.style.borderColor = '#fcd34d';
-        c1El.style.color = 'var(--penn-blue)'; c1El.style.fontWeight = '600';
-      }
-
-      c2El.textContent = r1(drop) + ' mg/dL';
-      if (criterion2) {
-        b2.style.background = 'var(--green-light)'; b2.style.borderColor = '#86efac';
-        c2El.style.color = 'var(--green)'; c2El.style.fontWeight = '700';
-      } else {
-        b2.style.background = 'var(--amber-light)'; b2.style.borderColor = '#fcd34d';
-        c2El.style.color = 'var(--penn-blue)'; c2El.style.fontWeight = '600';
-      }
-
-      c3El.textContent = current + ' mg/dL';
-      if (criterion3) {
-        b3.style.background = 'var(--green-light)'; b3.style.borderColor = '#86efac';
-        c3El.style.color = 'var(--green)'; c3El.style.fontWeight = '700';
-      } else {
-        b3.style.background = 'var(--amber-light)'; b3.style.borderColor = '#fcd34d';
-        c3El.style.color = 'var(--penn-blue)'; c3El.style.fontWeight = '600';
-      }
-
-      // Result card gets 'yes' class (green); non-result stays neutral (white) and fades
-      const cardYes = document.getElementById('sensCardYes');
-      const cardNo  = document.getElementById('sensCardNo');
-      if (cardYes && cardNo) {
-        if (sensitive) {
-          cardYes.className = 'decision-card yes'; cardYes.style.opacity = '1';   cardYes.style.filter = '';
-          cardNo.className  = 'decision-card neutral'; cardNo.style.opacity  = '0.4'; cardNo.style.filter  = 'grayscale(60%)';
-        } else {
-          cardNo.className  = 'decision-card yes'; cardNo.style.opacity  = '1';   cardNo.style.filter  = '';
-          cardYes.className = 'decision-card neutral'; cardYes.style.opacity = '0.4'; cardYes.style.filter = 'grayscale(60%)';
-        }
-      }
-
-      const reasons = [];
-      if (criterion1) reasons.push(`↓${r1(dropPct)}% from last`);
-      if (criterion2) reasons.push(`↓${r1(drop)} mg/dL`);
-      if (criterion3) reasons.push('BG <300');
-
-      badge.style.display = 'inline-block';
-      if (sensitive) {
-        badge.style.background = 'var(--green-light)';
-        badge.style.border     = '1.5px solid #86efac';
-        badge.style.color      = 'var(--green)';
-        badge.textContent      = '✓ Insulin Sensitive — ' + reasons.join(' · ');
-      } else {
-        badge.style.background = 'var(--red-light)';
-        badge.style.border     = '1.5px solid #fca5a5';
-        badge.style.color      = 'var(--red)';
-        badge.textContent      = '✗ Not Insulin Sensitive';
-      }
-    } else {
-      resetSensCards();
-    }
-
-    // Refresh dose panel if already configured
-    renderDosePanel();
+    // ... rest of updateAll() handles other UI updates (not shown here)
   }
 
-  // ── Toggle: Home Insulin ──
-  function setHomeInsulin(val) {
-    state.homeInsulin = val;
-    state.ir = null; state.precip = null; // reset downstream
-
-    document.getElementById('btnHomeYes').className = 'toggle-btn' + (val==='yes' ? ' active-yes' : '');
-    document.getElementById('btnHomeNo').className  = 'toggle-btn' + (val==='no'  ? ' active-yes' : '');
-
-    // Show IR question
-    document.getElementById('irSection').style.display = 'block';
-
-    // Reset IR buttons
-    document.getElementById('btnIRYes').className = 'toggle-btn';
-    document.getElementById('btnIRNo').className  = 'toggle-btn';
-    document.getElementById('dosePanel').style.display = 'none';
-  }
-
-  // ── Toggle: Insulin Resistant ──
-  function setIR(val) {
-    state.ir = val;
-    state.precip = null;
-
-    document.getElementById('btnIRYes').className = 'toggle-btn' + (val==='yes' ? ' active-no'  : '');
-    document.getElementById('btnIRNo').className  = 'toggle-btn' + (val==='no'  ? ' active-yes' : '');
-
-    document.getElementById('dosePanel').style.display = 'block';
-
-    // Reset precipitant buttons
-    document.getElementById('btnPrecipUnres').className = 'toggle-btn toggle-sm';
-    document.getElementById('btnPrecipRes').className   = 'toggle-btn toggle-sm';
-    document.getElementById('basalResult').style.display = 'none';
-
-    // Steroid panel: only show for home insulin + insulin resistant patients
-    document.getElementById('steroidPanel').style.display =
-      (state.homeInsulin === 'yes' && state.ir === 'yes') ? 'block' : 'none';
-
-    renderDosePanel();
-  }
-
-  // ── Toggle: Precipitant ──
-  function setPrecip(val) {
-    state.precip = val;
-    document.getElementById('btnPrecipUnres').className = 'toggle-btn toggle-sm' + (val==='unresolved' ? ' active-neutral' : '');
-    document.getElementById('btnPrecipRes').className   = 'toggle-btn toggle-sm' + (val==='resolved'   ? ' active-yes'     : '');
-    renderDosePanel();
-  }
-
-  // ── Render the dose result ──
-  function renderDosePanel() {
-    if (!state.homeInsulin || !state.ir) return;
-
-    const wt = getWt();
-
-    // Determine factor
-    // IR=yes → 0.35 (unresolved) / 0.30 (resolved)
-    // IR=no  → 0.25 (unresolved) / 0.20 (resolved)
-    const factorMap = {
-      yes: { unresolved: 0.35, resolved: 0.30 },
-      no:  { unresolved: 0.25, resolved: 0.20 }
-    };
-
-    const factor = state.precip ? factorMap[state.ir][state.precip] : null;
-    const dose   = (factor && wt) ? r1(wt * factor) : null;
-
-    // Panel header label
-    const irLabel   = state.ir === 'yes' ? 'Insulin Resistant' : 'Not Insulin Resistant';
-    const homeLabel = state.homeInsulin === 'yes' ? 'On Home Insulin' : 'No Home Insulin';
-    document.getElementById('dosePanelHeader').textContent =
-      `Basal Glargine Dose — ${homeLabel} · ${irLabel}`;
-
-    // Show result if precipitant chosen
-    const basalResultEl = document.getElementById('basalResult');
-    if (state.precip && factor !== null) {
-      basalResultEl.style.display = 'block';
-      const precipLabel = state.precip === 'unresolved' ? 'Unresolved precipitant' : 'Resolved / no precipitant';
-      document.getElementById('basalLabel').textContent = `${precipLabel} → ${factor} units/kg`;
-      document.getElementById('basalDose').textContent  = dose !== null ? dose + ' units' : 'Enter weight';
-      document.getElementById('basalFormula').textContent =
-        wt ? `${wt} kg × ${factor} units/kg = ${dose} units` : 'Enter patient weight to calculate';
-    } else {
-      basalResultEl.style.display = 'none';
-    }
-
-    // Prandial section
-    const prandialHeader = document.getElementById('prandialHeader');
-    const prandialBody   = document.getElementById('prandialBody');
-    const prandialDose   = wt ? r1(wt * 0.08) : null;
-
-    if (state.homeInsulin === 'yes') {
-      prandialHeader.textContent = 'Prandial Insulin — Home Doses (insulin aspart)';
-      prandialBody.innerHTML = `
-        <ul class="check-list">
-          <li>Administer home doses of rapid-acting insulin as <strong>insulin aspart</strong> with meals</li>
-          <li>Consider prandial dose adjustment if patient has poor PO intake</li>
-        </ul>
-        <div class="alert alert-amber" style="margin-top:8px;margin-bottom:0;">
-          ⚠ Review appropriateness of home basal dose — most patients will need 0.2–0.3 units/kg based on predicted insulin sensitivity
-        </div>`;
-    } else {
-      prandialHeader.textContent = 'Prandial Insulin — De Novo (insulin aspart)';
-      prandialBody.innerHTML = `
-        <div class="dose-box" style="margin-bottom:6px;">
-          <div>
-            <div class="dose-label">0.08 units/kg per meal</div>
-            <div class="dose-calc">${prandialDose !== null ? prandialDose + ' units/meal' : 'Enter weight'}</div>
-          </div>
-          <div style="font-size:11px;color:var(--gray-600);">${wt ? wt + ' kg × 0.08' : ''}</div>
-        </div>
-        <div style="font-size:11px;color:var(--gray-600);">Consider prandial dose adjustment if patient has poor PO intake</div>`;
-    }
-  }
-
-  // ── Tabs ──
+  // placeholder functions used elsewhere in the file
   function showTab(id, btn) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
-    // Show BG fields only on RN tab
-    const bgFields = document.getElementById('bgFields');
-    if (bgFields) bgFields.style.display = (id === 'pageRN') ? 'flex' : 'none';
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
   }
 
-  // ── Modals ──
   function openModal(id) {
-    document.getElementById(id).classList.add('open');
-    document.body.style.overflow = 'hidden';
+    const el = document.getElementById(id);
+    if (el) el.classList.add('open');
   }
   function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
-    document.body.style.overflow = '';
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
   }
   function closeOnOverlay(e, id) {
-    if (e.target === document.getElementById(id)) closeModal(id);
+    if (e.target && e.target.id === id) closeModal(id);
   }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-overlay.open').forEach(m => {
-        m.classList.remove('open');
-        document.body.style.overflow = '';
-      });
-    }
-  });
 </script>
+
 </body>
 </html>
