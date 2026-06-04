@@ -61,6 +61,9 @@
   /* utility to hide calc groups */
   .calc-hidden { display: none !important; }
 
+  /* highlight for selected fluid line */
+  .highlight-green { background: var(--green-light); border: 1px solid #86efac; padding: 6px 8px; border-radius: 6px; color: var(--green); }
+
   /* ── HEADER ── */
   .app-header {
     background: var(--blue-dark);
@@ -418,11 +421,10 @@
       <div class="section">
         <div class="section-header">Initial Fluids — 0.9% NS Bolus over 1 hr STAT</div>
         <div class="section-body">
-          <div class="calc-row">
+          <div class="calc-row" id="lt70Row">
             <span class="calc-label">&lt;70 kg → give <strong>1 L</strong></span>
           </div>
-          <!-- only show the calculated range when weight >= 70 kg -->
-          <div id="fluidCalcGroup" class="calc-hidden">
+          <div id="fluidCalcGroup">
             <div class="calc-row">
               <span class="calc-label">≥70 kg → 15–20 mL/kg =</span>
               <span class="calc-result" id="fluidRange">***</span>
@@ -664,234 +666,7 @@
     <!-- RESULTS PANEL (shown after both steps answered) -->
     <div id="dosePanel" style="display:none;margin-bottom:10px;">
 
-      <!-- Basal dose result -->
-      <div class="section">
-        <div class="section-header green" id="dosePanelHeader">Basal Insulin Glargine Dose</div>
-        <div class="section-body">
-
-          <!-- Precipitant selector -->
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Metabolic Precipitant Status:</div>
-          <div class="toggle-group" style="margin-bottom:10px;">
-            <button class="toggle-btn toggle-sm" id="btnPrecipUnres" onclick="setPrecip('unresolved')">Unresolved Precipitant</button>
-            <button class="toggle-btn toggle-sm" id="btnPrecipRes"   onclick="setPrecip('resolved')">Resolved / None</button>
-          </div>
-          <div style="font-size:10px;color:var(--gray-600);margin-bottom:10px;margin-top:-4px;">
-            Precipitants include: Infection · Pancreatitis · MI · High-dose steroids (Pred ≥40mg, MethylPred ≥30mg, Dex ≥6mg/day)
-          </div>
-
-          <div id="basalResult" style="display:none;">
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-              <div>
-                <div style="font-size:11px;color:var(--gray-600);margin-bottom:3px;" id="basalLabel">***</div>
-                <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--blue-dark);" id="basalDose">***</div>
-              </div>
-              <div style="font-size:11px;color:var(--gray-600);" id="basalFormula">***</div>
-            </div>
-          </div>
-
-          <!-- Steroid special case (home insulin + IR + steroids) -->
-          <div id="steroidPanel" style="display:none;margin-top:8px;padding:7px 9px;background:var(--purple-light);border:1px solid #e9d5ff;border-radius:4px;">
-            <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:3px;">High-Dose Steroid Path (home insulin patients only)</div>
-            <div style="font-size:11px;margin-bottom:4px;">If precipitant is high-dose steroids specifically:</div>
-            <div class="dose-box amber-box">
-              <div><div class="dose-label">Unresolved → <strong>1.2× home basal glargine dose</strong></div><div class="dose-calc" style="color:var(--amber);">1.2 × home dose</div></div>
-            </div>
-            <div class="dose-box" style="margin-top:4px;">
-              <div><div class="dose-label">Resolved → <strong>Home dose basal glargine</strong></div><div class="dose-calc">Home dose</div></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Prandial dose result -->
-      <div class="section">
-        <div class="section-header" id="prandialHeader">Prandial Insulin</div>
-        <div class="section-body" id="prandialBody">
-          <!-- filled by JS -->
-        </div>
-      </div>
-
-    </div><!-- /dosePanel -->
-
-    <!-- hidden IDs for updateAll() compatibility -->
-    <span id="d035a" style="display:none"></span>
-    <span id="d030a" style="display:none"></span>
-    <span id="d025a" style="display:none"></span>
-    <span id="d020a" style="display:none"></span>
-    <span id="d035b" style="display:none"></span>
-    <span id="d030b" style="display:none"></span>
-    <span id="d025b" style="display:none"></span>
-    <span id="d020b" style="display:none"></span>
-
-    <!-- dummy span for prandial id used by updateAll -->
-    <span id="prandial" style="display:none">***</span>
-
-  </div>
-  <div class="page-footer">Page 2 of 2 · Not Part of Medical Record · Rev. 02/26/26</div>
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- NOTES PAGE -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="tab-content" id="pageNotes">
-  <div class="page-inner">
-    <div style="font-size:13px;font-weight:700;color:var(--blue-dark);margin-bottom:10px;">Reference Notes</div>
-
-    <div class="notes-grid">
-
-      <!-- Evaluate Cause -->
-      <div class="note-card">
-        <div class="note-card-head">Evaluate Cause of HHS</div>
-        <div class="note-card-body">
-          <p>Assess for missed insulin doses or non-adherence.</p>
-          <p><strong>Obtain:</strong></p>
-          <ul>
-            <li>Blood and urine cultures</li>
-            <li>Chest X-ray</li>
-            <li>ECG and troponin</li>
-            <li>Lipase</li>
-            <li>Liver injury panel</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Managing Other Electrolytes -->
-      <div class="note-card">
-        <div class="note-card-head">Managing Other Electrolytes</div>
-        <div class="note-card-body">
-          <p><strong>Phosphate:</strong> Urgently replete to &gt;1 mg/dL with IV therapy (potassium phosphate; or sodium phosphate if hyperkalemic). Once minimum goal met, replete to normal range[...]</p>
-          <p><strong>Magnesium:</strong> Urgently replete to &gt;1.2 mg/dL with IV MgSO₄. Once minimum goal met, replete to normal range with PO or IV as tolerated.</p>
-        </div>
-      </div>
-
-      <!-- Other Calculations -->
-      <div class="note-card" style="grid-column:1/-1;">
-        <div class="note-card-head">Other Calculations: Anion Gap · Corrected Anion Gap · Corrected Na⁺ · Free Water Deficit</div>
-        <div class="note-card-body">
-          <div class="mono">
-            Anion Gap (Normal 10–14 mEq/L) = Na⁺ − (Cl⁻ + HCO₃⁻)<br>
-            Corrected AG (low albumin) = AG + (4 − albumin) × 2.5<br>
-            Corrected Na⁺ = measured Na⁺ + 1.6 × (serum glucose − 100) ÷ 100<br>
-            Free Water Deficit = [dosing factor × body weight (kg)] × [(serum Na⁺ ÷ 140) − 1]<br>
-            &nbsp;&nbsp;&nbsp;Dosing factor: 0.6 (male) · 0.5 (female)
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <div class="page-footer">Notes · Not Part of Medical Record · Rev. 02/26/26</div>
-  </div>
-
-</div><!-- /container -->
-
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- MODALS -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<!-- Diagnostic Criteria -->
-<div class="modal-overlay" id="modalDxCriteria" onclick="closeOnOverlay(event,'modalDxCriteria')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Diagnostic Criteria — Does patient meet ALL FIVE criteria for HHS?</h3>
-      <button class="modal-close" onclick="closeModal('modalDxCriteria')">×</button>
-    </div>
-    <div class="modal-body">
-      <p><strong>Large overlap with DKA exists.</strong> Patient must meet all five:</p>
-      <ol style="padding-left:18px;margin-top:6px;">
-        <li style="margin-bottom:6px;"><strong>Hyperglycemia:</strong> Serum glucose or capillary glucose &gt;600 mg/dL</li>
-        <li style="margin-bottom:6px;"><strong>Normal or mildly elevated ketones:</strong> Mildly elevated serum BHB (&lt;4 mmol/L) or small urinary ketones</li>
-        <li style="margin-bottom:6px;"><strong>No acidosis:</strong> Blood gas pH ≥7.3 AND serum bicarbonate ≥18 mEq/L (anion gap is variable)</li>
-        <li style="margin-bottom:6px;"><strong>Hyperosmolality:</strong> Serum osmolality &gt;320 mOsm/kg<br><span style="font-size:12px;color:var(--gray-600);">May measure directly or calculate effec[...]</li>
-        <li style="margin-bottom:0;"><strong>Change in mentation from baseline:</strong> May range from altered mental status to stupor/coma</li>
-      </ol>
-    </div>
-  </div>
-</div>
-
-<!-- Initial Triage -->
-<div class="modal-overlay" id="modalTriage" onclick="closeOnOverlay(event,'modalTriage')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Initial Triage: Obtaining Labs &amp; IV Access</h3>
-      <button class="modal-close" onclick="closeModal('modalTriage')">×</button>
-    </div>
-    <div class="modal-body">
-      <ul>
-        <li>Serum or capillary glucose</li>
-        <li>Serum beta-hydroxybutyrate (BHB) and UA for ketones</li>
-        <li>Venous or arterial blood gas</li>
-        <li>BMP, magnesium, phosphate, albumin, serum osmolality</li>
-        <li>β-HCG for reproductive-age women</li>
-        <li>Attempt to obtain 2 peripheral IV accesses (18g or larger preferred)</li>
-        <li>Obtain patient weight in kilograms</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Key Principles -->
-<div class="modal-overlay" id="modalKeyPrinciples" onclick="closeOnOverlay(event,'modalKeyPrinciples')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Key Principles — Ongoing Insulin &amp; Glucose Management</h3>
-      <button class="modal-close" onclick="closeModal('modalKeyPrinciples')">×</button>
-    </div>
-    <div class="modal-body">
-      <ul>
-        <li>Expect 50–100 mg/dL glucose decline every hour until at goal</li>
-        <li>Recheck glucose <strong>at least every hour</strong></li>
-        <li>Do <strong>not</strong> titrate insulin more frequently than hourly</li>
-        <li>VBG glucose may replace fingerstick</li>
-        <li>Glucose reading "high" or above glucometer assay limit must be verified with serum sample</li>
-        <li>Check BMP and serum osmolality <strong>at least every 4 hours</strong> per provider order</li>
-        <li>Insulin infusion &gt;30 units/hr → diabetes/endocrine consult required (if available)</li>
-        <li>If patient requests, may provide carb-controlled (no concentrated sweets) clear liquid diet</li>
-        <li><strong>Beware rapid glucose correction</strong> in patients with encephalopathy — may worsen cerebral edema and cause death due to transient hypo-osmolarity</li>
-        <li>Titration of insulin and dextrose is <strong>nurse-driven</strong>; electrolyte and volume management is <strong>provider-driven</strong></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Insulin Pump -->
-<div class="modal-overlay" id="modalInsulinPump" onclick="closeOnOverlay(event,'modalInsulinPump')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Insulin Pump Guidance</h3>
-      <button class="modal-close" onclick="closeModal('modalInsulinPump')">×</button>
-    </div>
-    <div class="modal-body">
-      <ul>
-        <li>If patient is on an insulin pump, ensure it is <strong>removed from patient and safely stored</strong> before initiating IV insulin.</li>
-        <li>Consult diabetes/endocrinology for pump management guidance (if available).</li>
-        <li>At transition: discontinue IV infusions <strong>1 hour after</strong> patient's own pump is restarted.</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Consults -->
-<div class="modal-overlay" id="modalConsults" onclick="closeOnOverlay(event,'modalConsults')">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Consults &amp; Special Considerations</h3>
-      <button class="modal-close" onclick="closeModal('modalConsults')">×</button>
-    </div>
-    <div class="modal-body">
-      <p><strong>Neurology / Neurocritical Care:</strong> Consider for HHS patients with encephalopathy and suspected brain injury or cerebral edema. Rapid correction of glucose may worsen cerebr[...]</p>
-      <p><strong>Diabetes / Endocrinology:</strong> Consider if available. Required (if available) when insulin infusion exceeds 30 units/hr. Required for home insulin pump patients.</p>
-      <p><strong>Titration roles:</strong> Insulin and dextrose titration is nurse-driven. Electrolyte management and volume resuscitation must be directed by the provider.</p>
-    </div>
-  </div>
-</div>
-
-
-
-<script>
+    <script>
   // ── State ──
   let state = { homeInsulin: null, ir: null, precip: null };
 
@@ -917,23 +692,16 @@
     const f20 = (wt ? r1(wt*20) : null);
     const fRange = (wt ? r1(wt*15) + '–' + r1(wt*20) + ' mL' : null);
 
-    // Only show the fluid calculation group when weight is >= 70 kg
-    const fluidGroup = document.getElementById('fluidCalcGroup');
-    const showFluid = (wt !== null && wt >= 70);
-    if (fluidGroup) {
-      fluidGroup.classList.toggle('calc-hidden', !showFluid);
+    // highlight <70 line when weight < 70 kg
+    const lt70Row = document.getElementById('lt70Row');
+    if (lt70Row) {
+      lt70Row.classList.toggle('highlight-green', wt !== null && wt < 70);
     }
 
-    // set or clear fluid display values depending on visibility
-    if (showFluid) {
-      set('fluidRange', fRange);
-      set('fluid15', f15);
-      set('fluid20', f20);
-    } else {
-      set('fluidRange', '***');
-      set('fluid15', '***');
-      set('fluid20', '***');
-    }
+    // always show the fluid calculation group; populate values if weight present
+    set('fluidRange', fRange ? fRange : '***');
+    set('fluid15',    f15   ? f15   : '***');
+    set('fluid20',    f20   ? f20   : '***');
 
     // other weight-driven values
     set('bolusDose',    wt ? r1(wt*0.1) + ' units'    : '***');
