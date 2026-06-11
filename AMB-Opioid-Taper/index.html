@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,24 +114,20 @@
     <div class="field-row">
       <div class="field"><label>Opioid</label>
         <select id="drug" onchange="recalc()">
-          <option value="morphine">Morphine IR</option>
-          <option value="morphine_er">Morphine ER</option>
-          <option value="oxycodone">Oxycodone IR</option>
-          <option value="oxycodone_er">Oxycodone ER (OxyContin)</option>
-          <option value="hydrocodone">Hydrocodone IR (with APAP/ibuprofen)</option>
-          <option value="hydrocodone_er">Hydrocodone ER</option>
-          <option value="hydromorphone">Hydromorphone IR</option>
-          <option value="hydromorphone_er">Hydromorphone ER (Exalgo)</option>
-          <option value="tramadol">Tramadol IR</option>
-          <option value="tramadol_er">Tramadol ER</option>
           <option value="codeine">Codeine IR</option>
-          <option value="methadone">Methadone IR</option>
-          <option value="methadone_dispersible">Methadone Dispersible 40 mg</option>
-          <option value="fentanyl">Fentanyl (mcg/hr patch)</option>
-          <option value="buprenorphine">Buprenorphine (mcg/hr patch)</option>
+          <option value="fentanyl_buccal">Fentanyl buccal/sublingual (mcg)</option>
+          <option value="fentanyl">Fentanyl patch (mcg/hr)</option>
+          <option value="hydrocodone">Hydrocodone IR (Vicodin, Norco)</option>
+          <option value="hydromorphone">Hydromorphone IR (Dilaudid)</option>
+          <option value="methadone">Methadone (Dolophine)</option>
+          <option value="morphine">Morphine IR</option>
+          <option value="oxycodone">Oxycodone IR (Roxicodone)</option>
+          <option value="oxymorphone">Oxymorphone IR (Opana)</option>
+          <option value="tapentadol">Tapentadol IR (Nucynta)</option>
+          <option value="tramadol">Tramadol IR (Ultram)</option>
         </select>
       </div>
-      <div class="field"><label>Dose per administration (mg)</label>
+      <div class="field"><label id="dose-label">Dose per administration (mg)</label>
         <input type="number" id="dose" value="30" min="0.1" step="0.5" oninput="recalc()" />
       </div>
     </div>
@@ -138,7 +135,7 @@
       <div class="field">
         <label>Doses per day</label>
         <input type="number" id="freq" value="3" min="1" max="12" step="1" oninput="recalc()" />
-        <span class="field-error" id="freq-error">Doses per day above 4 is uncommon for most opioids in outpatient primary care. Please verify before proceeding.</span>
+        <span class="field-error" id="freq-error">Doses per day above 6 is uncommon for most opioids in outpatient primary care. Please verify before proceeding.</span>
       </div>
       <div class="field"><label>Patient age</label>
         <select id="age" onchange="recalc()">
@@ -214,7 +211,7 @@
       <div class="toolbar-row">
         <button class="view-btn active" id="btn-provider" onclick="switchView('provider')"><i class="ti ti-stethoscope"></i> Provider schedule view</button>
         <button class="view-btn" id="btn-patient" onclick="switchView('patient')"><i class="ti ti-user"></i> Patient schedule view</button>
-        <button class="action-btn" onclick="printPatient()"><i class="ti ti-printer"></i> Print patient schedule (AVS)</button>
+        <button class="action-btn" onclick="printPatient()"><i class="ti ti-download"></i> Download patient schedule (AVS)</button>
       </div>
       <div class="toolbar-row">
         <button class="view-btn" id="btn-note" onclick="switchView('note')"><i class="ti ti-clipboard-text"></i> Chart note</button>
@@ -270,40 +267,35 @@
 </div>
 
 <script>
-const DISPLAY_WEEKS = 12;
+const DISPLAY_WEEKS = 8;
 
-const MME = {morphine:1,morphine_er:1,oxycodone:1.5,oxycodone_er:1.5,hydrocodone:1,hydrocodone_er:1,hydromorphone:4,hydromorphone_er:4,tramadol:0.1,tramadol_er:0.1,codeine:0.15,methadone:8,methadone_dispersible:8,fentanyl:2.4,buprenorphine:12.6};
-const isLA = {morphine_er:true,oxycodone_er:true,hydrocodone_er:true,hydromorphone_er:true,tramadol_er:true,fentanyl:true,buprenorphine:true};
-const canCut = {morphine:true,oxycodone:true,hydrocodone:true,hydromorphone:true,tramadol:true,codeine:true,methadone:true,methadone_dispersible:true};
+const MME = {codeine:0.15,fentanyl_buccal:0.13,fentanyl:2.4,hydrocodone:1,hydromorphone:5,methadone:4.7,morphine:1,oxycodone:1.5,oxymorphone:3,tapentadol:0.4,tramadol:0.2};
+const isLA = {fentanyl:true};
+const canCut = {codeine:true,hydrocodone:true,hydromorphone:true,methadone:true,morphine:true,oxycodone:true,oxymorphone:true,tapentadol:true,tramadol:true};
 
 const BASE_STRENGTHS = {
-  morphine:[15,30],morphine_er:[15,30,60,100,200],
-  oxycodone:[5,10,15,20,30],oxycodone_er:[10,15,20,30,40,60,80],
-  hydrocodone:[5,7.5,10],hydrocodone_er:[20,30,40,60,80,100,120],
-  hydromorphone:[2,4,8],hydromorphone_er:[8,12,16,32],
-  tramadol:[25,50,75,100],tramadol_er:[100,200,300],
   codeine:[15,30,60],
-  methadone:[5,10],methadone_dispersible:[40],
-  fentanyl:[12,25,37.5,50,62.5,75,87.5,100],
-  buprenorphine:[5,7.5,10,15,20]
+  fentanyl_buccal:[100,200,300,400,600,800],
+  fentanyl:[12.5,25,37.5,50,62.5,75,87.5,100],
+  hydrocodone:[2.5,5,7.5,10],
+  hydromorphone:[2,4,8,12,16,32],
+  methadone:[5,10,40],
+  morphine:[10,15,20,30,45,60,100,130,150,200],
+  oxycodone:[5,7.5,10,15,20,30,40],
+  oxymorphone:[5,7.5,10,15,20,30,40],
+  tapentadol:[50,75,100],
+  tramadol:[25,50,75,100]
 };
 
 
-// ER -> IR equivalent drug mapping
-const erToIR = {
-  morphine_er: 'morphine',
-  oxycodone_er: 'oxycodone',
-  hydrocodone_er: 'hydrocodone',
-  hydromorphone_er: 'hydromorphone',
-  tramadol_er: 'tramadol'
-};
+const erToIR = {};
 
-const drugLabels = {morphine:'Morphine IR',morphine_er:'Morphine ER',oxycodone:'Oxycodone IR',oxycodone_er:'Oxycodone ER',hydrocodone:'Hydrocodone IR',hydrocodone_er:'Hydrocodone ER',hydromorphone:'Hydromorphone IR',hydromorphone_er:'Hydromorphone ER',tramadol:'Tramadol IR',tramadol_er:'Tramadol ER',codeine:'Codeine IR',methadone:'Methadone IR',methadone_dispersible:'Methadone 40 mg dispersible',fentanyl:'Fentanyl patch',buprenorphine:'Buprenorphine patch'};
+const drugLabels = {codeine:'Codeine IR',fentanyl_buccal:'Fentanyl buccal/sublingual',fentanyl:'Fentanyl patch',hydrocodone:'Hydrocodone IR',hydromorphone:'Hydromorphone IR',methadone:'Methadone',morphine:'Morphine IR',oxycodone:'Oxycodone IR',oxymorphone:'Oxymorphone IR',tapentadol:'Tapentadol IR',tramadol:'Tramadol IR'};
 const durationLabels = {days:'days',weeks:'weeks',months_lt1:'months (less than 1 year)',years_gt1:'greater than 1 year'};
 const goalLabels = {discontinue:'full discontinuation',reduce50:'50% dose reduction',reduce75:'75% dose reduction',mme90:'reaching <90 MME/day'};
 const methodLabels = {dose:'reducing dose amount at each interval',freq:'reducing dose frequency at each interval (e.g., TID → BID → QD)',qty:'reducing monthly quantity dispensed; patient instructed to use fewer doses on good days'};
-const durationVelocity = {days:{pct:0.35,intervalWeeks:0.14,label:'Fastest — 20–50%/day',intervalLabel:'daily'},weeks:{pct:0.15,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},months_lt1:{pct:0.125,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},years_gt1:{pct:0.06,intervalWeeks:6,label:'Slowest — 2–10%/1–2 months',intervalLabel:'every 6 weeks'}};
-const overrideVelocity = {slowest:{pct:0.06,intervalWeeks:6,label:'Slowest — 2–5%/1–2 months',intervalLabel:'every 6 weeks'},slow:{pct:0.125,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},fast:{pct:0.15,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},fastest:{pct:0.35,intervalWeeks:0.14,label:'Fastest — 20–50%/day',intervalLabel:'daily'}};
+const durationVelocity = {days:{pct:0.50,maxPct:0.50,intervalWeeks:0.14,label:'Fastest — 50%/day',intervalLabel:'daily'},weeks:{pct:0.15,maxPct:0.20,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},months_lt1:{pct:0.125,maxPct:0.20,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},years_gt1:{pct:0.10,maxPct:0.10,intervalWeeks:6,label:'Slowest — 10%/6 weeks',intervalLabel:'every 6 weeks'}};
+const overrideVelocity = {slowest:{pct:0.10,maxPct:0.10,intervalWeeks:6,label:'Slowest — 10%/6 weeks',intervalLabel:'every 6 weeks'},slow:{pct:0.125,maxPct:0.20,intervalWeeks:4,label:'Slow — 5–20%/4 weeks',intervalLabel:'every 4 weeks'},fast:{pct:0.15,maxPct:0.20,intervalWeeks:1,label:'Fast — 10–20%/week',intervalLabel:'weekly'},fastest:{pct:0.50,maxPct:0.50,intervalWeeks:0.14,label:'Fastest — 50%/day',intervalLabel:'daily'}};
 
 let currentNoteText = '';
 let currentPatientHTML = '';
@@ -337,22 +329,24 @@ function snapToStrength(drug, rawDose, roundDir) {
   }
 }
 
-// Find best frequency-adjusted option: try increasing freq (up to currentFreq * 2, max 6 = Q4)
-// Returns {dose, freq, mme, isHalf} closest to targetMME without exceeding currentMME
-function findFreqAdjustedOption(drug, targetMME, currentMME, currentFreq, mmeConv, rounding) {
-  const maxFreq = Math.min(currentFreq * 2, 6);
-  let best = null;
-  for (let f = currentFreq + 1; f <= maxFreq; f++) {
-    const rawDose = targetMME / mmeConv / f;
-    const snapped = snapToStrength(drug, rawDose, rounding);
-    const snappedMME = snapped * f * mmeConv;
-    if (snappedMME >= currentMME) continue; // must be a reduction
-    const diff = Math.abs(snappedMME - targetMME);
-    if (!best || diff < Math.abs(best.mme - targetMME)) {
-      best = { dose: snapped, freq: f, mme: snappedMME, drug: drug };
-    }
+// Build overshoot alternatives based on tablet-count reduction (per rules).
+// halfUnit: the smallest dose unit (half of the original whole tablet).
+// totalHalfUnits: how many of those units are currently being taken per day.
+// Removes one half-unit at a time, distributes remainder evenly up to 6x/day.
+// Returns array of [{dose, freq, mme, drug, halfDoses, reductionPct}] sorted closest-to-target first.
+function findTabletCountOptions(drug, totalHalfUnits, halfUnit, currentMME, mmeConv, pct) {
+  const options = [];
+  for (let removed = 1; removed <= Math.min(3, totalHalfUnits - 1); removed++) {
+    const remaining = totalHalfUnits - removed;
+    const freq = Math.min(remaining, 6);
+    const halfUnitsPerAdmin = remaining / freq;
+    const dosePerAdmin = halfUnit * halfUnitsPerAdmin;
+    const newMME = dosePerAdmin * freq * mmeConv;
+    const reductionPct = (currentMME - newMME) / currentMME;
+    options.push({ dose: dosePerAdmin, freq, mme: newMME, drug, halfDoses: remaining, reductionPct, removed });
   }
-  return best;
+  options.sort((a, b) => Math.abs(a.reductionPct - pct) - Math.abs(b.reductionPct - pct));
+  return options;
 }
 
 function switchView(view) {
@@ -374,11 +368,36 @@ function copyNote() {
 }
 
 function printPatient() {
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Patient Taper Schedule</title>
-  <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;padding:2rem;max-width:680px;margin:0 auto;}h1{font-size:20px;font-weight:500;margin-bottom:4px;}.subtitle{font-size:13px;color:#666;margin-bottom:1.5rem;}.intro{font-size:13px;line-height:1.7;color:#444;margin-bottom:1.25rem;padding:0.75rem;background:#f5f5f3;border-radius:6px;}.step{padding:10px 14px;margin-bottom:8px;border:0.5px solid #ddd;border-radius:6px;}.step.ok{border-left:3px solid #639922;}.step.warn{border-left:3px solid #EF9F27;}.step.danger{border-left:3px solid #E24B4A;}.step-header{font-weight:500;font-size:14px;margin-bottom:3px;}.step-dose{font-size:13px;color:#555;}.footer{font-size:12px;color:#666;margin-top:1.25rem;padding:0.75rem;background:#f5f5f3;border-radius:6px;line-height:1.6;}@media print{body{padding:1rem;}}</style>
-  </head><body>${currentPatientHTML}<script>window.onload=function(){window.print();}<\/script></body></html>`);
-  win.document.close();
+  if (!currentPatientHTML) { alert('No schedule to print. Please configure the calculator first.'); return; }
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Patient Taper Schedule</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;padding:2rem;max-width:680px;margin:0 auto;}
+    h1{font-size:20px;font-weight:500;margin-bottom:4px;}
+    .subtitle{font-size:13px;color:#666;margin-bottom:1.5rem;}
+    .intro{font-size:13px;line-height:1.7;color:#444;margin-bottom:1.25rem;padding:0.75rem;background:#f5f5f3;border-radius:6px;}
+    .step{padding:10px 14px;margin-bottom:8px;border:0.5px solid #ddd;border-radius:6px;}
+    .step.ok{border-left:3px solid #639922;}
+    .step.warn{border-left:3px solid #EF9F27;}
+    .step.danger{border-left:3px solid #E24B4A;}
+    .step-header{font-weight:500;font-size:14px;margin-bottom:3px;}
+    .step-dose{font-size:13px;color:#555;}
+    .footer{font-size:12px;color:#666;margin-top:1.25rem;padding:0.75rem;background:#f5f5f3;border-radius:6px;line-height:1.6;}
+    .no-print{background:#E6F1FB;color:#0C447C;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:1.5rem;}
+    @media print{.no-print{display:none;}}
+  </style>
+  </head><body>
+  <div class="no-print">Open this file in a browser, then use File → Print (or Ctrl/Cmd+P) to print.</div>
+  ${currentPatientHTML}
+  </body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'patient-taper-schedule.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 function formatDuration(totalWeeks) {
@@ -393,19 +412,42 @@ function formatDuration(totalWeeks) {
 }
 
 function truncateToWeeks(steps, intervalWeeks, maxWeeks) {
-  return steps.slice(0, Math.max(1, Math.floor(maxWeeks / intervalWeeks)));
+  // Use per-step intervals if available
+  let totalWeeks = 0;
+  let count = 0;
+  for (const s of steps) {
+    const sw = s.stepIntervalWeeks || intervalWeeks;
+    if (totalWeeks + sw > maxWeeks && count > 0) break;
+    totalWeeks += sw;
+    count++;
+  }
+  return steps.slice(0, Math.max(1, count));
 }
 
-function stepTimeLabel(s, intervalWeeks, unit) {
-  if (intervalWeeks < 1) return 'Day ' + (s.step + 1);
-  if (unit === 'weeks') return 'Weeks ' + (s.step * intervalWeeks + 1) + '–' + ((s.step + 1) * intervalWeeks);
-  return 'Months ' + (s.step * intervalWeeks / 4.33).toFixed(1) + '–' + ((s.step + 1) * intervalWeeks / 4.33).toFixed(1);
+function stepTimeLabel(s, unit, allSteps) {
+  // Compute cumulative week start based on all prior steps' intervals
+  const iw = s.stepIntervalWeeks || 6;
+  let weekStart = 1;
+  if (allSteps) {
+    for (let i = 0; i < allSteps.length; i++) {
+      if (allSteps[i] === s) break;
+      weekStart += (allSteps[i].stepIntervalWeeks || 6);
+    }
+  }
+  const weekEnd = weekStart + iw - 1;
+  if (iw < 1) return 'Day ' + weekStart;
+  if (iw === 1) {
+    if (unit === 'weeks') return 'Week ' + weekStart;
+    return 'Month ' + (weekStart / 4.33).toFixed(1);
+  }
+  if (unit === 'weeks') return 'Weeks ' + weekStart + '–' + weekEnd;
+  return 'Months ' + (weekStart / 4.33).toFixed(1) + '–' + (weekEnd / 4.33).toFixed(1);
 }
 
 function validateFreq(freq) {
   const input = document.getElementById('freq');
   const error = document.getElementById('freq-error');
-  if (freq > 4) { input.classList.add('error'); error.classList.add('visible'); }
+  if (freq > 6) { input.classList.add('error'); error.classList.add('visible'); }
   else { input.classList.remove('error'); error.classList.remove('visible'); }
 }
 
@@ -415,66 +457,119 @@ const altOptionsStore = {};
 function selectAlt(stepIdx, optionIdx) {
   const allOptions = altOptionsStore[stepIdx];
   if (!allOptions) return;
-  // Store selection BEFORE renderSchedule so pre-population check sees it
-  stepSelections[stepIdx] = allOptions[optionIdx];
+  const current = stepSelections[stepIdx];
+  const clicked = allOptions[optionIdx];
+  // Clicking an already-selected option deselects it, reverting to the schedule default
+  if (current && current.dose === clicked.dose && current.freq === clicked.freq) {
+    delete stepSelections[stepIdx];
+    recomputeFromStep(stepIdx);
+    renderSchedule();
+    buildPatientAndNote();
+    return;
+  }
+  stepSelections[stepIdx] = clicked;
   recomputeFromStep(stepIdx);
-  // Temporarily freeze the selection so renderSchedule pre-pop doesn't overwrite it
   const frozen = stepSelections[stepIdx];
   renderSchedule();
-  // Restore after renderSchedule in case pre-pop overwrote it
   stepSelections[stepIdx] = frozen;
-  // Re-render patient/note with correct selection
   buildPatientAndNote();
 }
 
 function recomputeFromStep(fromIdx) {
   if (!_state) return;
-  const { pct, targetMME, rounding } = _state;
+  const { pct, maxPct, targetMME, rounding, intervalWeeks } = _state;
   const displaySteps = _state.displaySteps;
 
-  // Determine the active drug/freq/mme coming out of fromIdx
   const fromSel = stepSelections[fromIdx];
   const fromStep = displaySteps[fromIdx];
   let prevMME = fromSel ? fromSel.mme : fromStep.endMME;
-  // Carry forward the displayDrug/displayFreq from the selected or default step
   let activeDrug = fromSel ? (fromSel.drug || fromStep.displayDrug || _state.drug) : (fromStep.displayDrug || _state.drug);
   let activeFreq = fromSel ? fromSel.freq : (fromStep.displayFreq || _state.freq);
   let activeMmeConv = MME[activeDrug] || 1;
   let prevSnappedDose = fromSel ? fromSel.dose : fromStep.snappedDose;
-  // Debug
+
+  // Determine if we're entering tablet-count mode from the selection
+  // A selection has halfDoses if it came from findTabletCountOptions
+  let inTabletCountMode = fromSel && fromSel.halfDoses !== undefined;
+  let activeHalfUnit = inTabletCountMode
+    ? fromSel.dose / (fromSel.halfDoses / fromSel.freq)  // reconstruct halfUnit from selection
+    : (prevSnappedDose / 2);
+  let activeTotalHalfUnits = inTabletCountMode ? fromSel.halfDoses : (activeFreq * 2);
+
+  // If deselected (no fromSel) but original step was in tablet-count mode, restore from step defaults
+  if (!fromSel && fromStep.tabletOptions && fromStep.tabletOptions.length > 0) {
+    inTabletCountMode = true;
+    activeTotalHalfUnits = fromStep.snappedDose !== undefined ? fromStep.displayFreq * 2 : activeFreq * 2;
+    // Use halfUnit from the step's freqOption if available
+    if (fromStep.freqOption && fromStep.freqOption.halfDoses !== undefined) {
+      activeTotalHalfUnits = fromStep.freqOption.halfDoses;
+      activeHalfUnit = fromStep.freqOption.dose / (fromStep.freqOption.halfDoses / fromStep.freqOption.freq);
+    }
+  }
 
   for (let i = fromIdx + 1; i < displaySteps.length; i++) {
     delete stepSelections[i];
     const s = displaySteps[i];
     const current = prevMME;
-    const activeMinStrength = getStrengths(activeDrug)[0] || 0;
-    const next = Math.max(targetMME, current - current * pct);
-    const rawDose = next / activeMmeConv / activeFreq;
 
-    let snappedDose;
-    if (_state.goal === 'discontinue' && rawDose < activeMinStrength) {
-      snappedDose = 0;
+    let defaultDose, defaultFreq, defaultMME, overshoot, tabletOptions = [], freqOption = null;
+
+    if (inTabletCountMode && canCut[activeDrug]) {
+      // Continue removing one half-unit per step
+      tabletOptions = findTabletCountOptions(activeDrug, activeTotalHalfUnits, activeHalfUnit, current, activeMmeConv, pct);
+      const best = tabletOptions.length > 0 ? tabletOptions[0] : null;
+      if (!best || best.mme >= current - 0.01) break;
+      defaultDose = best.dose;
+      defaultFreq = best.freq;
+      defaultMME = best.mme;
+      freqOption = best;
+      const actualReductionPct = (current - defaultMME) / current;
+      overshoot = actualReductionPct > (maxPct || pct + 0.05);
     } else {
-      snappedDose = snapToStrength(activeDrug, rawDose, rounding);
+      const activeMinStrength = getStrengths(activeDrug)[0] || 0;
+      const next = Math.max(targetMME, current - current * pct);
+      const rawDose = next / activeMmeConv / activeFreq;
+      let snappedDose = (_state.goal === 'discontinue' && rawDose < activeMinStrength)
+        ? 0 : snapToStrength(activeDrug, rawDose, rounding);
+      const snappedMME = snappedDose * activeFreq * activeMmeConv;
+      const actualReductionPct = current > 0 ? (current - snappedMME) / current : 0;
+      overshoot = !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > maxPct;
+      defaultDose = snappedDose;
+      defaultFreq = activeFreq;
+      defaultMME = snappedMME;
+      if (overshoot && canCut[activeDrug]) {
+        tabletOptions = findTabletCountOptions(activeDrug, activeTotalHalfUnits, activeHalfUnit, current, activeMmeConv, pct);
+        if (tabletOptions.length > 0) {
+          freqOption = tabletOptions[0];
+          defaultDose = freqOption.dose;
+          defaultFreq = freqOption.freq;
+          defaultMME = freqOption.mme;
+          inTabletCountMode = true;
+        }
+      }
     }
 
-    const snappedMME = snappedDose * activeFreq * activeMmeConv;
-    const actualReductionPct = current > 0 ? (current - snappedMME) / current : 0;
-    const overshoot = !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > pct + 0.05;
-    let freqOption = null;
-    if (overshoot && canCut[activeDrug]) {
-      freqOption = findFreqAdjustedOption(activeDrug, next, current, activeFreq, activeMmeConv, rounding);
-    }
-    const stuck = snappedDose > 0 && snappedDose >= prevSnappedDose && i > fromIdx + 1;
+    const stuck = defaultDose > 0 && defaultDose >= prevSnappedDose && i > fromIdx + 1;
 
     displaySteps[i] = {
-      ...s, startMME: current, endMME: snappedMME,
-      reductionMME: current - snappedMME, snappedDose,
-      displayDrug: activeDrug, displayFreq: activeFreq,
-      stuck, overshoot, erOvershoot: false, freqOption, irSwitch: false
+      ...s, startMME: current, endMME: defaultMME,
+      reductionMME: current - defaultMME, snappedDose: defaultDose,
+      displayDrug: activeDrug, displayFreq: defaultFreq,
+      origSnappedDose: defaultDose, origSnappedMME: defaultMME, origFreq: defaultFreq,
+      stuck, overshoot, erOvershoot: false, freqOption, tabletOptions, irSwitch: false,
+      stepIntervalWeeks: s.stepIntervalWeeks || intervalWeeks
     };
-    prevSnappedDose = snappedDose;
-    prevMME = snappedMME;
+
+    prevSnappedDose = defaultDose;
+    activeFreq = defaultFreq;
+    prevMME = defaultMME;
+    if (inTabletCountMode && tabletOptions.length > 0) {
+      activeTotalHalfUnits = tabletOptions[0].halfDoses;
+    } else {
+      activeTotalHalfUnits = defaultFreq * 2;
+      activeHalfUnit = defaultDose / 2;
+    }
+    if (defaultMME <= targetMME + 0.01 || defaultDose === 0) break;
   }
 }
 
@@ -483,33 +578,34 @@ let _state = null;
 
 function renderSchedule() {
   if (!_state) return;
-  const { drug, freq, mmeConv, pct, intervalWeeks, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME } = _state;
+  const { drug, freq, mmeConv, pct, maxPct, intervalWeeks, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME } = _state;
   const drugName = drugLabels[drug];
 
-  let tableRows = displaySteps.map((s, i) => {
+  // Expand each step into individual week rows (one row per week per rules)
+  let tableRows = '';
+  let globalWeek = 1;
+  displaySteps.forEach((s, i) => {
     const sel = stepSelections[i];
     const stepDrug = sel ? (sel.drug || s.displayDrug || drug) : (s.displayDrug || drug);
     const stepFreq = sel ? sel.freq : (s.displayFreq || freq);
     const activeDose = sel ? sel.dose : s.snappedDose;
     const activeFreq = stepFreq;
     const activeMME = sel ? sel.mme : s.endMME;
-    const t = stepTimeLabel(s, intervalWeeks, unit);
     const cls = activeMME >= 90 ? 'badge-danger' : activeMME >= 50 ? 'badge-warn' : 'badge-ok';
-    const rowClass = s.irSwitch ? 'flag-row' : (s.overshoot ? 'flag-row' : (i % 2 === 1 ? 'alt-row' : ''));
     const dl = activeDose === 0 ? 'Discontinue' : doseLabel(stepDrug, activeDose);
-    const freqStr = activeFreq === 1 ? 'once daily' : activeFreq === 2 ? 'twice daily' : activeFreq === 3 ? 'three times daily' : `${activeFreq}x daily`;
+    const iw = s.stepIntervalWeeks || intervalWeeks;
+    const numWeeks = iw < 1 ? 1 : Math.round(iw); // daily tapers: 1 row per day handled below
+
+    // Build flag notes (only shown on first row of each step)
     const irSwitchNote = s.irSwitch
       ? `<span class="flag-cell" style="color:#0C447C;font-style:normal;"><i class="ti ti-arrows-exchange" style="font-size:12px;vertical-align:-1px;"></i> Switching to IR equivalent at same MME — allow 1 interval to stabilize before continuing taper. <button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#185FA5;font-size:11px;text-decoration:underline;padding:0;">IR taper guidance</button></span>`
       : '';
-    const overshootNote = s.overshoot && !sel
-      ? `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> Reduction is ${Math.round((s.startMME - s.endMME)/s.startMME*100)}% — exceeds target ${Math.round(pct*100)}%. See alternatives below.</span>`
-      : (s.overshoot && sel ? `<span class="flag-cell" style="color:#3B6D11;"><i class="ti ti-check"></i> Alternative selected: ${Math.round((s.startMME - activeMME)/s.startMME*100)}% reduction</span>` : '');
+    const overshootNote = s.overshoot && sel ? `<span class="flag-cell" style="color:#3B6D11;"><i class="ti ti-check"></i> Alternative selected: ${Math.round((s.startMME - activeMME)/s.startMME*100)}% reduction</span>` : '';
     let erOvershootNote = '';
     if (s.erOvershoot) {
       const irDrug = erToIR[drug];
       const irMmeConv = irDrug ? (MME[irDrug] || 1) : mmeConv;
       const irStrengths = irDrug ? getStrengths(irDrug) : [];
-      // Find best IR dose/freq combo closest to endMME
       let bestIR = null;
       if (irStrengths.length) {
         for (let f = 1; f <= 6; f++) {
@@ -525,13 +621,7 @@ function renderSchedule() {
       if (bestIR) {
         const irFreqLabel = bestIR.freq === 1 ? 'once daily' : bestIR.freq === 2 ? 'twice daily' : bestIR.freq === 3 ? 'three times daily' : bestIR.freq + 'x daily';
         const irDL = doseLabel(bestIR.drug, bestIR.dose);
-        erOvershootNote = `<span class="flag-cell" style="color:#0C447C;font-style:normal;">
-          <i class="ti ti-arrows-exchange" style="font-size:12px;vertical-align:-1px;"></i>
-          ER reduction exceeds target — switch to IR:
-          <strong>${drugLabels[bestIR.drug]} ${irDL} ${irFreqLabel}</strong>
-          (${Math.round(bestIR.mme)} MME/day)
-          &nbsp;<button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#185FA5;font-size:11px;text-decoration:underline;padding:0;">IR taper guidance</button>
-        </span>`;
+        erOvershootNote = `<span class="flag-cell" style="color:#0C447C;font-style:normal;"><i class="ti ti-arrows-exchange" style="font-size:12px;vertical-align:-1px;"></i> ER reduction exceeds target — switch to IR: <strong>${drugLabels[bestIR.drug]} ${irDL} ${irFreqLabel}</strong> (${Math.round(bestIR.mme)} MME/day) &nbsp;<button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#185FA5;font-size:11px;text-decoration:underline;padding:0;">IR taper guidance</button></span>`;
       } else {
         erOvershootNote = `<span class="flag-cell"><i class="ti ti-alert-triangle"></i> ER reduction exceeds target and no IR equivalent found. <button onclick="document.getElementById('terminal-modal').classList.add('open')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:11px;text-decoration:underline;padding:0;">See terminal taper switch guidance.</button></span>`;
       }
@@ -540,11 +630,30 @@ function renderSchedule() {
     const stepReductionAmt = Math.round(s.startMME - activeMME);
     const stepReductionPct = s.startMME > 0 ? Math.round((s.startMME - activeMME) / s.startMME * 100) : 0;
     const overallReductionPct = dailyMME > 0 ? Math.round((dailyMME - activeMME) / dailyMME * 100) : 0;
-    const reductionCell = s.irSwitch
-      ? '—'
-      : `−${stepReductionAmt} MME (${stepReductionPct}% from prev | ${overallReductionPct}% overall)`;
-    return `<tr class="${rowClass}"><td>${t}</td><td>${dl} × ${activeFreq}x/day${irSwitchNote}${overshootNote}${erOvershootNote}${stuckNote}</td><td>${Math.round(s.startMME)}</td><td style="font-size:12px;">${reductionCell}</td><td><span class="badge ${cls}">${Math.round(activeMME)} MME</span></td></tr>`;
-  }).join('');
+
+    if (iw < 1) {
+      // Daily taper: single row labelled "Day N"
+      const dayLabel = unit === 'weeks' ? `Day ${globalWeek}` : `Day ${globalWeek}`;
+      const reductionCell = s.irSwitch ? '—' : `−${stepReductionAmt} MME (${stepReductionPct}% from prev | ${overallReductionPct}% overall)`;
+      const rowClass = s.irSwitch ? 'flag-row' : (s.overshoot ? 'flag-row' : (globalWeek % 2 === 0 ? 'alt-row' : ''));
+      tableRows += `<tr class="${rowClass}"><td>${dayLabel}</td><td>${dl} × ${activeFreq}x/day${irSwitchNote}${overshootNote}${erOvershootNote}${stuckNote}</td><td>${Math.round(s.startMME)}</td><td style="font-size:12px;">${reductionCell}</td><td><span class="badge ${cls}">${Math.round(activeMME)} MME</span></td></tr>`;
+      globalWeek++;
+    } else {
+      // Multi-week step: one row per week; flags and reduction only on first week row
+      for (let w = 0; w < numWeeks; w++) {
+        const weekLabel = `Week ${globalWeek}`;
+        const isFirst = w === 0;
+        const rowClass = s.irSwitch ? 'flag-row' : (s.overshoot && isFirst ? 'flag-row' : (globalWeek % 2 === 0 ? 'alt-row' : ''));
+        const doseCell = `${dl} × ${activeFreq}x/day${isFirst ? (irSwitchNote + overshootNote + erOvershootNote + stuckNote) : ''}`;
+        const reductionCell = isFirst
+          ? (s.irSwitch ? '—' : `−${stepReductionAmt} MME (${stepReductionPct}% from prev | ${overallReductionPct}% overall)`)
+          : '<span style="color:#bbb;font-size:11px;">continuing</span>';
+        const startMmeCell = isFirst ? Math.round(s.startMME) : '↓';
+        tableRows += `<tr class="${rowClass}"><td>${weekLabel}</td><td>${doseCell}</td><td style="color:${isFirst?'':'#aaa'}">${startMmeCell}</td><td style="font-size:12px;">${reductionCell}</td><td>${isFirst ? `<span class="badge ${cls}">${Math.round(activeMME)} MME</span>` : `<span style="color:#aaa;font-size:12px;">${Math.round(activeMME)} MME</span>`}</td></tr>`;
+        globalWeek++;
+      }
+    }
+  });
 
   if (!tableRows) tableRows = `<tr><td colspan="5" style="color:#888;text-align:center;padding:1rem;">Already at or below target.</td></tr>`;
   const truncRow = isTruncated ? `<tr><td colspan="5" style="font-style:italic;font-size:12px;color:#888;padding:8px;">Schedule continues beyond week ${DISPLAY_WEEKS} — remaining steps to be reviewed at follow-up visits.</td></tr>` : '';
@@ -553,38 +662,61 @@ function renderSchedule() {
     <table><thead><tr><th>Take this dose for</th><th>Prescribed dose</th><th>MME/day (before)</th><th>Reduction</th><th>MME after step</th></tr></thead>
     <tbody>${tableRows}${truncRow}</tbody></table>`;
 
-  // Alt panels
+  // Alt panels — compute cumulative week start for each step
   let altPanelsHTML = '';
+  let altWeekCursor = 1;
   displaySteps.forEach((s, i) => {
+    const iw2 = s.stepIntervalWeeks || intervalWeeks;
+    const nw2 = iw2 < 1 ? 1 : Math.round(iw2);
+    const weekStart2 = altWeekCursor;
+    const weekEnd2 = altWeekCursor + nw2 - 1;
+    altWeekCursor += nw2;
     if (!s.overshoot || s.stuck) return;
-    const t = stepTimeLabel(s, intervalWeeks, unit);
+    const t = nw2 === 1 ? `Week ${weekStart2}` : `Weeks ${weekStart2}–${weekEnd2}`;
     const targetMME = s.startMME * (1 - pct);
     const stepDrugAlt = s.displayDrug || drug;
     const stepFreqAlt = s.displayFreq || freq;
-    const freqOpt = s.freqOption;
-    const overOpt = { dose: s.snappedDose, freq: stepFreqAlt, mme: s.endMME, drug: stepDrugAlt };
-    const options = freqOpt ? [freqOpt, overOpt] : [overOpt];
+    const tabOpts = s.tabletOptions || [];
+    // tabletOptions[0] is already the schedule default — show remaining as alternatives, plus orig snap as last resort
+    const origOpt = (s.origSnappedDose && s.origSnappedDose !== s.snappedDose)
+      ? { dose: s.origSnappedDose, freq: s.origFreq || freq, mme: s.origSnappedMME, drug: stepDrugAlt, isOrig: true }
+      : null;
+    const altTabOpts = tabOpts.slice(1); // skip [0] — it's already the default
+    const options = [...altTabOpts, ...(origOpt ? [origOpt] : [])];
+    if (!options.length) return; // nothing to show
     const sel = stepSelections[i];
 
-    // Store options - never auto-select, only store on explicit provider click
     altOptionsStore[i] = options;
     const optRows = options.map((opt, oi) => {
       const optDrug = opt.drug || stepDrugAlt;
       const isSelected = sel ? (sel.dose === opt.dose && sel.freq === opt.freq) : false;
-      const dl = opt.dose === 0 ? 'Discontinue' : doseLabel(optDrug, opt.dose);
-      const freqStr = opt.freq === 1 ? 'once daily' : opt.freq === 2 ? 'twice daily' : opt.freq === 3 ? 'three times daily' : `${opt.freq}x daily`;
       const reductionPct = Math.round((s.startMME - opt.mme) / s.startMME * 100);
-      const isBest = oi === 0 && freqOpt;
-      const tag = isBest
-        ? `<span class="alt-tag alt-tag-best">Closest to target</span>`
-        : `<span class="alt-tag alt-tag-over">Overshoots — ${reductionPct}% reduction</span>`;
-      const detail = isBest
-        ? `${Math.round(opt.mme)} MME/day — ${reductionPct}% reduction (${opt.freq}x daily using pill cutter)`
-        : `${Math.round(opt.mme)} MME/day — next available tablet strength at current frequency`;
+      const withinTarget = (s.startMME - opt.mme) / s.startMME <= maxPct;
+      const isOrig = opt.isOrig;
+
+      const halfTabStr = opt.halfDoses !== undefined
+        ? `${opt.halfDoses} half-dose${opt.halfDoses !== 1 ? 's' : ''}/day`
+        : null;
+      const doseDisplay = `${opt.dose % 1 !== 0 ? opt.dose.toFixed(2).replace(/\.?0+$/, '') : opt.dose} mg`;
+      const splitNote = opt.halfDoses !== undefined ? ` (½ tablet)` : '';
+
+      let tag;
+      if (isOrig) {
+        tag = `<span class="alt-tag alt-tag-over">Overshoots — ${reductionPct}% reduction</span>`;
+      } else if (withinTarget) {
+        tag = `<span class="alt-tag alt-tag-best">Within target — ${reductionPct}% reduction</span>`;
+      } else {
+        tag = `<span class="alt-tag alt-tag-over">Closest available — ${reductionPct}% reduction</span>`;
+      }
+
+      const detail = isOrig
+        ? `${Math.round(opt.mme)} MME/day — next available whole/half tablet at current frequency`
+        : `${Math.round(opt.mme)} MME/day — ${halfTabStr ? halfTabStr + ', ' : ''}${opt.freq}x daily${splitNote ? ', pill cutter required' : ''}`;
+
       return `<div class="alt-option${isSelected?' selected':''}" onclick="selectAlt(${i},${oi})">
         <div class="alt-radio${isSelected?' checked':''}"></div>
         <div class="alt-body">
-          <div class="alt-dose">${dl} × ${opt.freq}x/day ${tag}</div>
+          <div class="alt-dose">${doseDisplay}${splitNote} × ${opt.freq}x/day ${tag}</div>
           <div class="alt-detail">${detail}</div>
         </div>
       </div>`;
@@ -595,7 +727,7 @@ function renderSchedule() {
         <i class="ti ti-adjustments-horizontal" style="font-size:16px;color:#854F0B;flex-shrink:0;" aria-hidden="true"></i>
         <div>
           <div class="alt-panel-title">Alternatives for ${t} — target reduction is ~${Math.round(pct*100)}% (~${Math.round(targetMME)} MME/day)</div>
-          <div class="alt-panel-sub">No single tablet strength achieves the target. Select the option that best fits this patient.</div>
+          <div class="alt-panel-sub">Default schedule uses the closest-to-target option. Select an alternative if clinically appropriate.</div>
         </div>
       </div>
       ${optRows}
@@ -616,26 +748,39 @@ function buildPatientAndNote() {
   const patientIntro = `Your care team has created a plan to slowly reduce your ${drugName} dose. The schedule below covers the first ${DISPLAY_WEEKS} weeks. Your doctor will review your progress at each visit and provide updated steps. Do not skip ahead — go at this pace unless your doctor tells you otherwise.`;
   let patientStepsHTML = '', printSteps = '', schedHTML = '', schedPlain = '';
 
+  let patWeek = 1;
   displaySteps.filter(s => !s.stuck).forEach((s, i) => {
     const sel = stepSelections[i];
-    // If provider selected an alternative, use that drug/freq; else use the step's displayDrug/displayFreq
     const stepDrug = sel ? (sel.drug || s.displayDrug || drug) : (s.displayDrug || drug);
     const stepFreq = sel ? sel.freq : (s.displayFreq || freq);
     const activeDose = sel ? sel.dose : s.snappedDose;
     const activeFreq = stepFreq;
     const activeMME = sel ? sel.mme : s.endMME;
-    const t = stepTimeLabel(s, intervalWeeks, unit);
-    const tPatient = t.replace('–', ' through ');
     const dl = activeDose === 0 ? 'Discontinue' : doseLabel(stepDrug, activeDose);
     const stepDrugName = drugLabels[stepDrug] || drugName;
     const aFreqLabel = activeFreq === 1 ? 'once daily' : activeFreq === 2 ? 'twice daily' : activeFreq === 3 ? 'three times daily' : `${activeFreq}x daily`;
     const sc = activeMME >= 90 ? 'step-danger' : activeMME >= 50 ? 'step-warn' : 'step-ok';
     const pc = activeMME >= 90 ? 'danger' : activeMME >= 50 ? 'warn' : 'ok';
+    const iw = s.stepIntervalWeeks || intervalWeeks;
+    const numWeeks = iw < 1 ? 1 : Math.round(iw);
 
-    patientStepsHTML += `<div class="patient-step ${sc}"><div class="patient-step-header">Step ${i + 1}: ${tPatient}</div><div class="patient-step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
-    printSteps += `<div class="step ${pc}"><div class="step-header">Step ${i + 1}: ${tPatient}</div><div class="step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
-    schedHTML += `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;${t}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)</div>`;
-    schedPlain += `  ${t}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)\n`;
+    if (iw < 1) {
+      const label = `Day ${patWeek}`;
+      patientStepsHTML += `<div class="patient-step ${sc}"><div class="patient-step-header">${label}</div><div class="patient-step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+      printSteps += `<div class="step ${pc}"><div class="step-header">${label}</div><div class="step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+      schedHTML += `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;${label}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)</div>`;
+      schedPlain += `  ${label}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)\n`;
+      patWeek++;
+    } else {
+      for (let w = 0; w < numWeeks; w++) {
+        const label = `Week ${patWeek}`;
+        patientStepsHTML += `<div class="patient-step ${sc}"><div class="patient-step-header">${label}</div><div class="patient-step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+        printSteps += `<div class="step ${pc}"><div class="step-header">${label}</div><div class="step-dose">Take ${stepDrugName} <strong>${dl}</strong> — ${aFreqLabel}</div></div>`;
+        schedHTML += `<div style="font-family:'Courier New',monospace;font-size:12px;padding:2px 0;">&nbsp;&nbsp;${label}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)</div>`;
+        schedPlain += `  ${label}: ${stepDrugName} ${dl} ${aFreqLabel} (${Math.round(activeMME)} MME/day)\n`;
+        patWeek++;
+      }
+    }
   });
 
   const patientContinue = isTruncated
@@ -689,14 +834,16 @@ function recalc() {
 
   validateFreq(freq);
 
-  // Reset selections when inputs change
+  // Update dose label unit for mcg drugs
+  const doseUnit = (drug === 'fentanyl' || drug === 'fentanyl_buccal') ? 'mcg' : 'mg';
+  document.getElementById('dose-label').textContent = `Dose per administration (${doseUnit})`;
   stepSelections = {};
 
   const mmeConv = MME[drug] || 1;
   const longActing = !!isLA[drug];
   const dailyMME = dose * freq * mmeConv;
   const vel = velocityOverride === 'auto' ? durationVelocity[duration] : overrideVelocity[velocityOverride];
-  const { pct, intervalWeeks, label, intervalLabel } = vel;
+  const { pct, maxPct, intervalWeeks, label, intervalLabel } = vel;
 
   let targetMME;
   if (goal === 'discontinue') targetMME = 0;
@@ -713,10 +860,46 @@ function recalc() {
   let activeMmeConv = mmeConv;
   let activeFreq = freq;
   let switchedToIR = false;
+  // Track half-unit state for tablet-count overshoot resolution
+  let activeHalfUnit = dose / 2;         // smallest splittable unit (half of original whole tablet)
+  let activeTotalHalfUnits = freq * 2;   // total half-units currently taken per day
+  let inTabletCountMode = false;         // once true, always use tablet-count reduction
 
   while (current > targetMME + 0.01 && stepNum < 80) {
     const activeMinStrength = getStrengths(activeDrug)[0] || 0;
     const next = Math.max(targetMME, current - current * pct);
+
+    // If we're in tablet-count mode, bypass snap and directly remove one half-unit
+    if (inTabletCountMode && canCut[activeDrug]) {
+      const tabletOptions = findTabletCountOptions(activeDrug, activeTotalHalfUnits, activeHalfUnit, current, activeMmeConv, pct);
+      const best = tabletOptions.length > 0 ? tabletOptions[0] : null;
+      if (!best || best.mme >= current - 0.01) break; // stuck
+
+      const defaultDose = best.dose;
+      const defaultFreq = best.freq;
+      const defaultMME = best.mme;
+      const actualReductionPct = (current - defaultMME) / current;
+      const overshoot = actualReductionPct > (maxPct || pct + 0.05);
+
+      allSteps.push({
+        step: stepNum, startMME: current, endMME: defaultMME,
+        reductionMME: current - defaultMME, snappedDose: defaultDose,
+        displayFreq: defaultFreq, displayDrug: activeDrug,
+        origSnappedDose: defaultDose, origSnappedMME: defaultMME, origFreq: defaultFreq,
+        stuck: false, overshoot, erOvershoot: false, freqOption: best,
+        tabletOptions: tabletOptions.slice(1).concat(overshoot ? [] : []),
+        irSwitch: false, stepIntervalWeeks: intervalWeeks
+      });
+
+      prevSnappedDose = defaultDose;
+      activeFreq = defaultFreq;
+      current = defaultMME;
+      activeTotalHalfUnits = best.halfDoses;
+      stepNum++;
+      if (defaultMME <= targetMME + 0.01 || defaultDose === 0) break;
+      continue;
+    }
+
     const rawDosePerAdmin = next / activeMmeConv / activeFreq;
 
     let snappedDose;
@@ -732,7 +915,7 @@ function recalc() {
 
     // ER overshoot: insert IR hold step at same MME, then continue tapering as IR
     const erOvershootCheck = !stuck && !switchedToIR && isLA[activeDrug] && erToIR[activeDrug]
-      && snappedDose > 0 && actualReductionPct > pct + 0.05;
+      && snappedDose > 0 && actualReductionPct > maxPct;
 
     if (erOvershootCheck) {
       const irDrug = erToIR[activeDrug];
@@ -753,7 +936,7 @@ function recalc() {
           reductionMME: current - bestIR.mme, snappedDose: bestIR.dose,
           displayFreq: bestIR.freq, displayDrug: bestIR.drug,
           stuck: false, overshoot: false, erOvershoot: false, freqOption: null,
-          irSwitch: true
+          irSwitch: true, stepIntervalWeeks: 1
         });
         stepNum++;
         activeDrug = irDrug;
@@ -766,28 +949,49 @@ function recalc() {
       }
     }
 
-    const overshoot = !stuck && !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > pct + 0.05;
+    const overshoot = !stuck && !isLA[activeDrug] && snappedDose > 0 && actualReductionPct > maxPct;
     const erOvershoot = false;
     let freqOption = null;
+    let tabletOptions = [];
+    let defaultDose = snappedDose;
+    let defaultFreq = activeFreq;
+    let defaultMME = snappedMME;
     if (overshoot && canCut[activeDrug]) {
-      freqOption = findFreqAdjustedOption(activeDrug, next, current, activeFreq, activeMmeConv, rounding);
+      tabletOptions = findTabletCountOptions(activeDrug, activeTotalHalfUnits, activeHalfUnit, current, activeMmeConv, pct);
+      if (tabletOptions.length > 0) {
+        const best = tabletOptions[0];
+        defaultDose = best.dose;
+        defaultFreq = best.freq;
+        defaultMME = best.mme;
+        freqOption = best;
+        inTabletCountMode = true;
+      }
     }
 
     allSteps.push({
-      step: stepNum, startMME: current, endMME: snappedMME,
-      reductionMME: current - snappedMME, snappedDose,
-      displayFreq: activeFreq, displayDrug: activeDrug,
-      stuck, overshoot, erOvershoot, freqOption, irSwitch: false
+      step: stepNum, startMME: current, endMME: defaultMME,
+      reductionMME: current - defaultMME, snappedDose: defaultDose,
+      displayFreq: defaultFreq, displayDrug: activeDrug,
+      origSnappedDose: snappedDose, origSnappedMME: snappedMME, origFreq: activeFreq,
+      stuck, overshoot, erOvershoot, freqOption, tabletOptions, irSwitch: false,
+      stepIntervalWeeks: intervalWeeks
     });
 
     if (stuck) break;
-    prevSnappedDose = snappedDose;
-    current = snappedMME;
+    prevSnappedDose = defaultDose;
+    activeFreq = defaultFreq;
+    current = defaultMME;
+    if (inTabletCountMode && tabletOptions.length > 0) {
+      activeTotalHalfUnits = tabletOptions[0].halfDoses;
+    } else {
+      activeTotalHalfUnits = defaultFreq * 2;
+      activeHalfUnit = defaultDose / 2;
+    }
     stepNum++;
-    if (snappedMME <= targetMME + 0.01 || snappedDose === 0) break;
+    if (defaultMME <= targetMME + 0.01 || defaultDose === 0) break;
   }
 
-  const totalWeeks = allSteps.length * intervalWeeks;
+  const totalWeeks = allSteps.reduce((sum, s) => sum + (s.stepIntervalWeeks || intervalWeeks), 0);
   const totalDurLabel = formatDuration(totalWeeks);
   const nextVisitLabel = intervalWeeks < 1 ? 'in 1–2 days' : intervalWeeks <= 1 ? 'in 1 week' : intervalWeeks <= 4 ? 'in 4 weeks' : 'in 6 weeks';
 
@@ -808,12 +1012,14 @@ function recalc() {
   const warnings = [];
   if (dailyMME >= 90) warnings.push({level:'danger', text:'Starting MME ≥90 — high-risk threshold. Naloxone required.'});
   else if (dailyMME >= 50) warnings.push({level:'warn', text:'Starting MME ≥50 — consider naloxone co-prescription.'});
-  if (drug === 'methadone' || drug === 'methadone_dispersible') warnings.push({level:'warn', text:'Methadone: QTc and unique pharmacokinetic risks. Specialist co-management strongly recommended.'});
-  if (drug === 'methadone_dispersible') warnings.push({level:'warn', text:'Methadone 40 mg dispersible: restricted to certified opioid treatment programs. Verify eligibility before prescribing.'});
+  if (drug === 'oxymorphone') warnings.push({level:'warn', text:'Oxymorphone brand (Opana ER) was withdrawn from US market in 2017. Verify availability of any generic formulation before prescribing.'});
+  if (drug === 'tapentadol') warnings.push({level:'warn', text:'Tapentadol has both opioid and norepinephrine reuptake inhibition activity. MME conversion (0.4) is approximate — monitor closely.'});
+  if (drug === 'fentanyl_buccal') warnings.push({level:'warn', text:'Fentanyl buccal/sublingual: TIRF REMS program required. MME conversion (0.13) is approximate. Dose is in mcg, not mg.'});
   if (drug === 'hydrocodone') warnings.push({level:'warn', text:'Hydrocodone IR is only available co-formulated with acetaminophen or ibuprofen. Monitor cumulative APAP dose (max 3–4 g/day).'});
-  if (drug === 'fentanyl' || drug === 'buprenorphine') warnings.push({level:'warn', text:'Patch formulation: step down through available strengths or convert to oral IR for finer dose control.'});
+  if (drug === 'fentanyl') warnings.push({level:'warn', text:'Fentanyl patch: step down through available mcg/hr strengths. Convert to oral IR for finer dose control at lower doses.'});
   if (age === 'elderly') warnings.push({level:'warn', text:'Elderly patient: use slowest taper velocity. Increased fall, sedation, and withdrawal risk.'});
-  if (intervalWeeks < 1) warnings.push({level:'warn', text:'Daily taper appropriate for acute/recent-onset only. Ensure close monitoring.'});
+  if (freq > 6) warnings.push({level:'warn', text:`Unusual frequency: ${freq} doses/day is above 6 — verify this regimen before proceeding.`});
+  if (intervalWeeks < 1) warnings.push({level:'warn', text:'Daily taper is appropriate for acute or recent-onset opioid use only. Ensure close clinical monitoring.'});
   if (hasStuck) warnings.push({level:'warn', text:`No further dose reduction is possible at available ${drugLabels[drug]} tablet strengths. Consider switching taper method to "reduce dose frequency" or "reduce monthly quantity dispensed."`});
   document.getElementById('warning-box').innerHTML = warnings.map(w => `<div class="warn-box ${w.level === 'danger' ? 'warn-danger' : 'warn-warn'}">${w.text}</div>`).join('');
 
@@ -821,7 +1027,7 @@ function recalc() {
   document.getElementById('clinical-note').innerHTML = `<strong>Method:</strong> ${methodNote[method]}<br><br><strong>Reminder:</strong> Schedule above covers the first ${DISPLAY_WEEKS} weeks. Estimated total taper duration: ${totalDurLabel}. Progress will be re-evaluated at each visit — taper velocity, dose, and schedule will be adjusted based on patient response. Pause or slow if withdrawal symptoms, functional decline, or psychological distress emerge. Dose reduction alone is a valid goal. Obtain patient agreement before initiating and document all conversations.`;
 
   // Store state for re-rendering on selection change
-  _state = { drug, dose, freq, mmeConv, pct, intervalWeeks, intervalLabel, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME, targetMME, duration, goal, age, nextVisitLabel, longActing, rounding };
+  _state = { drug, dose, freq, mmeConv, pct, maxPct, intervalWeeks, intervalLabel, unit, displaySteps, isTruncated, totalDurLabel, method, dailyMME, targetMME, duration, goal, age, nextVisitLabel, longActing, rounding };
 
   renderSchedule();
 }
